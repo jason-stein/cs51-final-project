@@ -4,7 +4,7 @@ open Core.Std
  * get out a string list of the best words. All internal functionality is hidden
  * from the user. *)
  
-module type TRIE
+module type TRIE =
 sig
   
   (* Type for trie node *)
@@ -18,4 +18,21 @@ sig
   
 end
 
-module Word
+module WordTrie : TRIE = 
+struct
+
+  type node = 
+  
+  type trie = 
+  
+  let parse_args : int*char list =
+  
+  let rec insert (n : node) (t : trie) : trie = 
+  
+  let rec permute (letters : int*char list) (t : trie) : int*char list list =
+  
+  let score (lst : int*char list) : int =
+  
+  let find_words = 
+  
+end
