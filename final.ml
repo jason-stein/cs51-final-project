@@ -35,4 +35,8 @@ struct
   
   let find_words = 
   
+  (* parse args, insert all words from dictionary into a trie, 
+   * permute given letters over the trie, score them, then print 
+   * the first n top-scoring words *)
+  
 end
