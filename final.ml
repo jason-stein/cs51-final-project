@@ -23,7 +23,7 @@ struct
 
   type node = 
   
-  type trie = 
+  type trie = string option * trie option list
   
   let parse_args : int*char list =
   
