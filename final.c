@@ -1,4 +1,6 @@
-/* Letterpress "Best Words" Solver
+/* 
+ * 
+ * Letterpress "Best Words" Solver
  * By Jason Stein and Mason Hale
  *
  */
