@@ -43,6 +43,23 @@ void insert(char* word)
     return;
 }
 
+bool load(const char* dictionary)
+{
+    FILE* dict = fopen(dictionary, "r");
+    if (dict == NULL)
+    {
+        return false;
+    }
+    
+    char* word = NULL;
+    while((fscanf(dict, "%s", word)) == 1)
+    {
+        insert(word);
+    }
+    
+    return true;
+}
+
 int main(int argc, char* argv[])
 {
     if (argc != 4)
