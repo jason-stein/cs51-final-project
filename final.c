@@ -28,7 +28,7 @@ void insert(char* word)
         int index = word[i] - 'a';
         if (crawl->children[index] != NULL)
         {
-            crawl = crawl->children[index];      
+            crawl = crawl->children[index];    
         }
         else 
         {
