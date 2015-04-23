@@ -10,14 +10,50 @@
 #include <string.h>
 #include <stdbool.h>
 
+#define DICTIONARY "words.txt"
+
+//maybe something like #define DICTIONARY "/.../cs51-final-project/words.txt" would work if that doesn't
+
+#define ALPH_SIZE 26
+
+void insert(char* word);
+bool load(const char* dictionary);
+
+//types for trie implementation
+
 typedef struct node 
 {
     bool is_word;
-    struct node* children [26];
+    struct node* children [ALPH_SIZE];
 }
 node;
 
 node root = {false,{NULL}};
+
+int main(int argc, char* argv[])
+{
+    if (argc != 4)
+    {
+    
+        /* The user will be entering three lists, described as follows:
+         * 1) White spaces (unclaimed by either player)
+         * 2) Light red spaces (claimed by opponent but up-for-grabs)
+         * 3) Dark red spaces and blue spaces (not up-for-grabs--won't improve score if used)
+         */
+        
+        printf("Usage: ./final UnclaimedArray OpponentPotentialArray \
+         OpponentBlockedAndPlayer'sArray \n");
+        return 0;
+    }
+    
+    char* dictionary = DICTIONARY;
+    
+    if (!load(dictionary)) 
+    {
+        return 0;
+    }   
+
+}
 
 void insert(char* word)
 {
@@ -60,15 +96,4 @@ bool load(const char* dictionary)
     return true;
 }
 
-int main(int argc, char* argv[])
-{
-    if (argc != 4)
-    {
-        printf("Usage: ./final UnclaimedArray OpponentPotentialArray \
-         OpponentBlockedAndPlayerArray \n");
-        return 1;
-    }
-    
-    
 
-}
