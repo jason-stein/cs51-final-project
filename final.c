@@ -51,6 +51,11 @@ int main(int argc, char* argv[])
     if (!load(dictionary)) 
     {
         return 0;
+    }
+    else
+    {
+        return 1;
+        unload(dictionary);
     }   
 
 }
