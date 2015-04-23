@@ -24,13 +24,13 @@ bool unload (void);
 
 typedef struct node 
 {
-    bool is_word;
+    char* stored_word;
     struct node* children [ALPH_SIZE];
 }
 node;
 
 // global variable for the root node of the trie
-node root = {false,{NULL}};
+node root = {NULL,{NULL}};
 
 int main(int argc, char* argv[])
 {
@@ -43,8 +43,7 @@ int main(int argc, char* argv[])
          * 3) Dark red spaces and blue spaces (not up-for-grabs--won't improve score if used)
          */
         
-        printf("Usage: ./final UnclaimedArray OpponentPotentialArray \
-         OpponentBlockedAndPlayer'sArray \n");
+        printf("Usage: ./final UnclaimedArray OpponentPotentialArray OpponentBlockedAndPlayer'sArray \n");
         return 0;
     }
     
@@ -52,12 +51,12 @@ int main(int argc, char* argv[])
     
     if (!load(dictionary)) 
     {
-        return 0;
+        return 1;
     }
     else
     {
-        return 1;
-        unload(dictionary);
+        unload();
+        return 0;
     }   
 
 }
@@ -89,7 +88,7 @@ void insert(char* word)
         // to true, to indicate a finished word
         if (i == length - 1)
         {
-            crawl->is_word = true;
+            crawl->stored_word = word;
         }
     };
     return;
