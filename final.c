@@ -1,3 +1,8 @@
+/* Letterpress "Best Words" Solver
+ * By Jason Stein and Mason Hale
+ *
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
