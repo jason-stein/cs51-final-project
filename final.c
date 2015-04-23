@@ -42,3 +42,16 @@ void insert(char* word)
     };
     return;
 }
+
+int main(int argc, char* argv[])
+{
+    if (argc != 4)
+    {
+        printf("Usage: ./final UnclaimedArray OpponentPotentialArray \
+         OpponentBlockedAndPlayerArray \n");
+        return 1;
+    }
+    
+    
+
+}
