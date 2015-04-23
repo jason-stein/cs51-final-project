@@ -33,4 +33,5 @@ int insert(char* word)
             crawl->is_word = true;
         }
     };
+    return 0;
 }
