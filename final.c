@@ -12,7 +12,7 @@ node;
 
 node root = {false,{NULL}};
 
-int insert(char* word)
+void insert(char* word)
 {
     int length = strlen(word);
     node* crawl = &root;
@@ -33,5 +33,5 @@ int insert(char* word)
             crawl->is_word = true;
         }
     };
-    return 0;
+    return;
 }

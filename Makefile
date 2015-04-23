@@ -13,7 +13,7 @@ CC = clang
 CFLAGS = -ggdb3 -c -O0 -Qunused-arguments -std=c99 -Wall -Werror
 
 # name for executable
-EXE = speller
+EXE = final
 
 # space-separated list of header files
 HDRS = 
