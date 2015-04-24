@@ -25,7 +25,7 @@ bool search(char* query);
 
 typedef struct node 
 {
-    char* stored_word;
+    bool stored_word;
     struct node* children [ALPH_SIZE];
 }
 node;
@@ -99,8 +99,8 @@ void insert(char* word)
         // to true, to indicate a finished word
         if (word[i + 1] == '\0')
         {
-            crawl->stored_word = word;
-            printf("stored %s\n", crawl->stored_word);
+            crawl->stored_word = true;
+            printf("stored %s\n", word);
         }
     };
     return;
@@ -148,7 +148,8 @@ bool search(char* query)
         return false;    
     }
     */
-    printf("The stored word is %s\n",crawl->stored_word);
+    // printf("The stored word is %s\n",crawl->stored_word);
+    return crawl->stored_word;
 }
 
 // recursive helper function that unloads all children of a pointer to a node
