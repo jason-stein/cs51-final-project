@@ -61,7 +61,7 @@ int main(int argc, char* argv[])
     if(search("mason"))
         printf("mason is in the dictionary!\n");
     else 
-        printf("you fucked up\n");
+        printf("mason is not in the dictionart :(\n");
     
     if (!unload())
     {
@@ -139,16 +139,7 @@ bool search(char* query)
         }
         else crawl = crawl->children[index];
     }
-    /*
-    if (strcmp(crawl->stored_word, query) == 0)
-        return true;
-    else
-    {
-        printf("how did you fuck this up?");
-        return false;    
-    }
-    */
-    // printf("The stored word is %s\n",crawl->stored_word);
+    
     return crawl->stored_word;
 }
 
