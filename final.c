@@ -10,7 +10,6 @@
 #include <string.h>
 #include <stdbool.h>
 
-#define DICTIONARY "words.txt"
 
 //maybe something like #define DICTIONARY "/.../cs51-final-project/words.txt" would work if that doesn't
 
@@ -34,7 +33,7 @@ node root = {NULL,{NULL}};
 
 int main(int argc, char* argv[])
 {
-    if (argc != 4)
+    if (argc != 5)
     {
     
         /* The user will be entering three lists, described as follows:
@@ -43,21 +42,27 @@ int main(int argc, char* argv[])
          * 3) Dark red spaces and blue spaces (not up-for-grabs--won't improve score if used)
          */
         
-        printf("Usage: ./final UnclaimedArray OpponentPotentialArray OpponentBlockedAndPlayer'sArray \n");
+        printf("Usage: ./final Dictionary UnclaimedArray OpponentPotentialArray OpponentBlockedAndPlayer'sArray \n");
         return 0;
     }
     
-    char* dictionary = DICTIONARY;
+    char* dictionary = argv[1];
     
-    if (!load(dictionary)) 
+    if (!load(dictionary))
     {
+        printf("error: failed to load dictionary\n");
         return 1;
     }
-    else
+    
+    printf("Successfully loaded dictionary.\n");
+    
+    if (!unload())
     {
-        unload();
-        return 0;
-    }   
+        printf("error: failed to unload dictionary\n");
+        return 1;
+    }
+    return 0;
+ 
 
 }
 
@@ -117,6 +122,11 @@ bool load(const char* dictionary)
 // recursive helper function that unloads all children of a pointer to a node
 void unload_recursive(node* n)
 {
+    if (n == NULL)
+    {
+        return;
+    }
+    
     for(int i = 0; i < ALPH_SIZE; i++)
     {
         if (n->children[i] != NULL)
