@@ -14,10 +14,12 @@
 //maybe something like #define DICTIONARY "/.../cs51-final-project/words.txt" would work if that doesn't
 
 #define ALPH_SIZE 26
+#define MAX_LENGTH 45
 
 void insert(char* word);
 bool load(const char* dictionary);
 bool unload (void);
+bool search(char* query);
 
 //types for trie implementation
 
@@ -56,9 +58,13 @@ int main(int argc, char* argv[])
     
     printf("Successfully loaded dictionary.\n");
     
+    if(search("mason"))
+        printf("mason is in the dictionary!\n");
+    else 
+        printf("you fucked up\n");
+    
     if (!unload())
     {
-        printf("error: failed to unload dictionary\n");
         return 1;
     }
     return 0;
@@ -86,7 +92,7 @@ void insert(char* word)
         // malloc one then crawl to it
         else 
         {
-            crawl->children[index] = malloc(sizeof(node));
+            crawl->children[index] = calloc(1, sizeof(node));
             crawl = crawl->children[index];
         }
         // if we are at the last letter of the word, set the bool at this level
@@ -94,6 +100,7 @@ void insert(char* word)
         if (i == length - 1)
         {
             crawl->stored_word = word;
+            printf("stored %s\n", crawl->stored_word);
         }
     };
     return;
@@ -110,13 +117,39 @@ bool load(const char* dictionary)
     }
     
     // start reading words and inserting them until out of words
-    char* word = NULL;
+    char word [MAX_LENGTH];
     while((fscanf(dict, "%s", word)) == 1)
     {
         insert(word);
     }
     
     return true;
+}
+
+bool search(char* query)
+{
+    int length = strlen(query);
+    node* crawl = &root;
+    for (int i = 0; i < length; i++)
+    {
+        int index = query[i] - 'a';
+        if (crawl->children[index] == NULL)
+        {
+            printf("you REALLY fucked up");
+            return false;
+        }
+        else crawl = crawl->children[index];
+    }
+    /*
+    if (strcmp(crawl->stored_word, query) == 0)
+        return true;
+    else
+    {
+        printf("how did you fuck this up?");
+        return false;    
+    }
+    */
+    printf("The stored word is %s\n",crawl->stored_word);
 }
 
 // recursive helper function that unloads all children of a pointer to a node
