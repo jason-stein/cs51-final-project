@@ -97,7 +97,7 @@ void insert(char* word)
         }
         // if we are at the last letter of the word, set the bool at this level
         // to true, to indicate a finished word
-        if (i == length - 1)
+        if (word[i + 1] == '\0')
         {
             crawl->stored_word = word;
             printf("stored %s\n", crawl->stored_word);
@@ -135,7 +135,6 @@ bool search(char* query)
         int index = query[i] - 'a';
         if (crawl->children[index] == NULL)
         {
-            printf("you REALLY fucked up");
             return false;
         }
         else crawl = crawl->children[index];
