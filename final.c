@@ -78,6 +78,7 @@ int main(int argc, char* argv[])
         return 1;
     }
     
+    // make sure the user enters the right number of letters
     if (strlen(argv[1]) + strlen(argv[2]) + strlen(argv[3]) 
         != LIST_MAX_LENGTH * sizeof(char))
     {
@@ -87,10 +88,11 @@ int main(int argc, char* argv[])
     
     else
     {
-      memcpy(available, argv[1], strlen(argv[1]));
-      memcpy(available + strlen(argv[1]), argv[2], strlen(argv[2]));
-      memcpy(available + strlen(argv[2]), argv[3], strlen(argv[3]));
-      printf("Available letters: %s\n", available);
+      // concatenate the command line arguments into one string
+      strcat(available, argv[1]);
+      strcat(available, argv[2]);
+      strcat(available, argv[3]);
+      printf("Available letters: %s\n", available); 
     }
     
     if (!load(DICTIONARY))
