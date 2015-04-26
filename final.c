@@ -78,7 +78,7 @@ int main(int argc, char* argv[])
         return 1;
     }
     
-    if (sizeof(argv[1]) + sizeof(argv[2]) + sizeof(argv[3]) 
+    if (strlen(argv[1]) + strlen(argv[2]) + strlen(argv[3]) 
         != LIST_MAX_LENGTH * sizeof(char))
     {
         printf("Please enter a total of 25 letters.");
@@ -87,7 +87,10 @@ int main(int argc, char* argv[])
     
     else
     {
-      // CONCATENATE ARRAYS
+      memcpy(available, argv[1], strlen(argv[1]));
+      memcpy(available + strlen(argv[1]), argv[2], strlen(argv[2]));
+      memcpy(available + strlen(argv[2]), argv[3], strlen(argv[3]));
+      printf("Available letters: %s\n", available);
     }
     
     if (!load(DICTIONARY))
