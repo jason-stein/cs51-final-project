@@ -70,7 +70,8 @@ int main(int argc, char* argv[])
          * 3) Dark red spaces and blue spaces (not up-for-grabs--won't improve score if used)
          */
         
-        printf("Usage: ./final UnclaimedArray OpponentPotentialArray OpponentBlockedAndPlayer'sArray \n");
+        printf("Usage: ./final UnclaimedArray "\
+        "OpponentPotentialArray OpponentBlockedAndPlayer'sArray \n");
         return 0;
     }
     
