@@ -117,7 +117,8 @@ void trie_insert(char* word)
         else 
         {
             crawl->children[index] = calloc(1, sizeof(trie_node));
-            crawl->children[index]->stored_word = calloc(DICT_MAX_LENGTH, sizeof(char));
+            crawl->children[index]->stored_word = 
+              calloc(DICT_MAX_LENGTH, sizeof(char));
             crawl = crawl->children[index];
         }
         // if we are at the last character of the word, copy it into the stored
