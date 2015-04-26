@@ -20,6 +20,7 @@
 #define ALPH_SIZE 26
 #define DICT_MAX_LENGTH 45
 #define LIST_MAX_LENGTH 25
+#define DICTIONARY "words.txt"
 
 /*
  * Function Prototypes
@@ -60,7 +61,7 @@ list_node* head = NULL;
 
 int main(int argc, char* argv[])
 {
-    if (argc != 5)
+    if (argc != 4)
     {
     
         /* The user will be entering three lists, described as follows:
@@ -69,13 +70,11 @@ int main(int argc, char* argv[])
          * 3) Dark red spaces and blue spaces (not up-for-grabs--won't improve score if used)
          */
         
-        printf("Usage: ./final Dictionary UnclaimedArray OpponentPotentialArray OpponentBlockedAndPlayer'sArray \n");
+        printf("Usage: ./final UnclaimedArray OpponentPotentialArray OpponentBlockedAndPlayer'sArray \n");
         return 0;
     }
     
-    char* dictionary = argv[1];
-    
-    if (!load(dictionary))
+    if (!load(DICTIONARY))
     {
         printf("error: failed to load dictionary\n");
         return 1;
