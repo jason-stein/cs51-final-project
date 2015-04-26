@@ -29,7 +29,7 @@ void trie_insert(char* word);
 bool load(const char* dictionary);
 bool unload (void);
 bool search(char* query);
-bool test(char* query);
+bool trie_test(char* query);
 void list_insert(char* word);
 bool free_list(void);
 
@@ -58,9 +58,12 @@ trie_node root = {NULL,{NULL}};
 
 list_node* head = NULL;
 
+char available[LIST_MAX_LENGTH];
+
 
 int main(int argc, char* argv[])
 {
+    // parse user input
     if (argc != 4)
     {
     
@@ -72,7 +75,19 @@ int main(int argc, char* argv[])
         
         printf("Usage: ./final UnclaimedArray "\
         "OpponentPotentialArray OpponentBlockedAndPlayer'sArray \n");
-        return 0;
+        return 1;
+    }
+    
+    if (sizeof(argv[1]) + sizeof(argv[2]) + sizeof(argv[3]) 
+        != LIST_MAX_LENGTH * sizeof(char))
+    {
+        printf("Please enter a total of 25 letters.");
+        return 1;
+    }
+    
+    else
+    {
+      // CONCATENATE ARRAYS
     }
     
     if (!load(DICTIONARY))
@@ -83,9 +98,9 @@ int main(int argc, char* argv[])
     
     printf("Successfully loaded dictionary.\n");
     
-    test("mason");
-    test("butts");
-    test("asdfgh");
+    trie_test("mason");
+    trie_test("butts");
+    trie_test("asdfgh");
     
     if (!unload())
     {
@@ -214,7 +229,7 @@ bool unload(void)
 }
 
 // helper function that tests trie with a given query
-bool test(char* query)
+bool trie_test(char* query)
 {
     if(search(query))
     {
