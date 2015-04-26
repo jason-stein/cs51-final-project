@@ -67,16 +67,17 @@ int main(int argc, char* argv[])
     if (argc != 4)
     {
     
-        /* The user will be entering three lists, described as follows:
-         * 1) White spaces (unclaimed by either player)
-         * 2) Light red spaces (claimed by opponent but up-for-grabs)
-         * 3) Dark red spaces and blue spaces (not up-for-grabs--won't improve score if used)
+        /* The user will be entering three strings, described as follows:
+         * 1) White space letters (unclaimed by either player)
+         * 2) Light red space letters (claimed by opponent but up-for-grabs)
+         * 3) Dark red space and blue space letters (not up-for-grabs--won't improve score if used)
          */
         
-        printf("Usage: ./final UnclaimedArray "\
-        "OpponentPotentialArray OpponentBlockedAndPlayer'sArray \n");
+        printf("Usage: ./final UnclaimedString "\
+        "OpponentPotentialString OpponentBlockedAndPlayer'sString \n");
         return 1;
     }
+    
     
     // make sure the user enters the right number of letters
     if (strlen(argv[1]) + strlen(argv[2]) + strlen(argv[3]) 
