@@ -67,28 +67,18 @@ int main(int argc, char* argv[])
     if (argc != 4)
     {
     
-        /* The user will be entering three lists, described as follows:
-         * 1) White spaces (unclaimed by either player)
-         * 2) Light red spaces (claimed by opponent but up-for-grabs)
-         * 3) Dark red spaces and blue spaces (not up-for-grabs--won't improve score if used)
+        /* The user will be entering three strings, described as follows:
+         * 1) White space letters (unclaimed by either player)
+         * 2) Light red space letters (claimed by opponent but up-for-grabs)
+         * 3) Dark red space and blue space letters (not up-for-grabs--won't improve score if used)
          */
         
-        printf("Usage: ./final UnclaimedArray "\
-        "OpponentPotentialArray OpponentBlockedAndPlayer'sArray \n");
+        printf("Usage: ./final UnclaimedString "\
+        "OpponentPotentialString OpponentBlockedAndPlayer'sString \n");
         return 1;
     }
     
-    if (sizeof(argv[1]) + sizeof(argv[2]) + sizeof(argv[3]) 
-        != LIST_MAX_LENGTH * sizeof(char))
-    {
-        printf("Please enter a total of 25 letters.");
-        return 1;
-    }
     
-    else
-    {
-      // CONCATENATE ARRAYS
-    }
     
     if (!load(DICTIONARY))
     {
