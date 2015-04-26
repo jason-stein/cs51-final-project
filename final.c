@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <ctype.h>
 
 /*
  * Global Constants
@@ -32,6 +33,7 @@ bool search(char* query);
 bool trie_test(char* query);
 void list_insert(char* word);
 bool free_list(void);
+bool check_alpha(char* word);
 
 /*
  * ADTs for Trie and Linked List Nodes
@@ -86,6 +88,14 @@ int main(int argc, char* argv[])
         printf("Please enter a total of 25 letters.");
         return 1;
     }
+    
+    else 
+        if (!check_alpha(argv[1]) || !check_alpha(argv[1]) 
+            || !check_alpha(argv[1]))
+        {
+            printf("Please only enter letters!\n");
+            return 1;
+        }
     
     else
     {
@@ -298,6 +308,17 @@ bool free_list(void)
         crawler = crawler->next;
         free(temp->stored_word);
         free(temp);
+    }
+    
+    return true;
+}
+
+bool check_alpha(char* word)
+{
+    for(int i = 0, length = strlen(word); i < length; i++)
+    {
+        if(!isalpha(word[i]))
+            return false;
     }
     
     return true;
