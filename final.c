@@ -95,6 +95,7 @@ int main(int argc, char* argv[])
       printf("Available letters: %s\n", available); 
     }
     
+    // attempt to load the dictionary
     if (!load(DICTIONARY))
     {
         printf("error: failed to load dictionary\n");
@@ -103,10 +104,12 @@ int main(int argc, char* argv[])
     
     printf("Successfully loaded dictionary.\n");
     
+    // some tests
     trie_test("mason");
     trie_test("butts");
     trie_test("asdfgh");
     
+    // unload the dictionary
     if (!unload())
     {
         printf("Successfully unloaded dictionary.\n");
@@ -217,6 +220,7 @@ void unload_recursive(trie_node* n)
     }
     
     // free the node
+    free(n->stored_word);
     free(n);
 }
 
@@ -248,8 +252,10 @@ bool trie_test(char* query)
     }
 }
 
+// inserts a node into a linked list
 void list_insert(char* word)
 {
+    // allocate space for the new node (
     list_node* new_node = malloc(sizeof(list_node));
     
     if (new_node == NULL)
@@ -258,15 +264,19 @@ void list_insert(char* word)
         return;
     }
     
+    // allocate space to store the new node's word
     new_node->stored_word = calloc(LIST_MAX_LENGTH, sizeof(char));
     
+    // store the word in the node
     strcpy(new_node->stored_word, word);
     
+    // base case for empty list
     if (head == NULL)
     {
         new_node->next = NULL;
         head = new_node;
     }
+    // insert into existing list
     else
     {
         new_node->next = head;
@@ -274,10 +284,13 @@ void list_insert(char* word)
     }
 }
 
+// frees all memory used by the linked list
 bool free_list(void)
 {
+    // initialize a list_node pointer to act as a crawler
     list_node* crawler = head;
     
+    // crawl through the list, freeing all memory
     while (crawler != NULL)
     {
         list_node* temp = crawler;
