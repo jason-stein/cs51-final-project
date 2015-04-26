@@ -263,4 +263,6 @@ bool free_list(void)
         free(temp->stored_word);
         free(temp);
     }
+    
+    return true;
 }
