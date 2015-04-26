@@ -18,17 +18,20 @@
  * Global Constants
  */
 #define ALPH_SIZE 26
-#define MAX_LENGTH 45
+#define DICT_MAX_LENGTH 45
+#define LIST_MAX_LENGTH 25
 #define DICTIONARY "words.txt"
 
 /*
  * Function Prototypes
  */
-void insert(char* word);
+void trie_insert(char* word);
 bool load(const char* dictionary);
 bool unload (void);
 bool search(char* query);
 bool test(char* query);
+void list_insert(char* word);
+bool free_list(void);
 
 /*
  * ADTs for Trie and Linked List Nodes
@@ -40,10 +43,20 @@ typedef struct trie_node
 }
 trie_node;
 
+typedef struct list_node
+{
+    char* stored_word;
+    int score;
+    struct list_node* next;
+}
+list_node;
+
 /*
- * Root of the Trie
+ * Roots of the trie and linked list
  */
 trie_node root = {NULL,{NULL}};
+
+list_node* head = NULL;
 
 
 int main(int argc, char* argv[])
@@ -84,7 +97,7 @@ int main(int argc, char* argv[])
 }
 
 // inserts a single word into the trie
-void insert(char* word)
+void trie_insert(char* word)
 {
     int length = strlen(word);
     // initialize a crawler that starts at the root node
@@ -104,7 +117,7 @@ void insert(char* word)
         else 
         {
             crawl->children[index] = calloc(1, sizeof(trie_node));
-            crawl->children[index]->stored_word = calloc(MAX_LENGTH, sizeof(char));
+            crawl->children[index]->stored_word = calloc(DICT_MAX_LENGTH, sizeof(char));
             crawl = crawl->children[index];
         }
         // if we are at the last character of the word, copy it into the stored
@@ -128,10 +141,10 @@ bool load(const char* dictionary)
     }
     
     // start reading words and inserting them until out of words
-    char word [MAX_LENGTH];
+    char word [DICT_MAX_LENGTH];
     while((fscanf(dict, "%s", word)) == 1)
     {
-        insert(word);
+        trie_insert(word);
     }
     
     return true;
@@ -210,5 +223,44 @@ bool test(char* query)
     {
         printf("%s is not in the dictionary :(\n", query);
         return false;
+    }
+}
+
+void list_insert(char* word)
+{
+    list_node* new_node = malloc(sizeof(list_node));
+    
+    if (new_node == NULL)
+    {
+        printf("Failed to allocate memory.");
+        return;
+    }
+    
+    new_node->stored_word = calloc(LIST_MAX_LENGTH, sizeof(char));
+    
+    strcpy(new_node->stored_word, word);
+    
+    if (head == NULL)
+    {
+        new_node->next = NULL;
+        head = new_node;
+    }
+    else
+    {
+        new_node->next = head;
+        head = new_node;
+    }
+}
+
+bool free_list(void)
+{
+    list_node* crawler = head;
+    
+    while (crawler != NULL)
+    {
+        list_node* temp = crawler;
+        crawler = crawler->next;
+        free(temp->stored_word);
+        free(temp);
     }
 }
