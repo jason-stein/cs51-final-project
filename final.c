@@ -5,33 +5,45 @@
  *
  */
 
+
+/*
+ * Function Libraries
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
 
-
-//maybe something like #define DICTIONARY "/.../cs51-final-project/words.txt" would work if that doesn't
-
+/*
+ * Global Constants
+ */
 #define ALPH_SIZE 26
 #define MAX_LENGTH 45
 
+/*
+ * Function Prototypes
+ */
 void insert(char* word);
 bool load(const char* dictionary);
 bool unload (void);
 bool search(char* query);
+bool test(char* query);
 
-//types for trie implementation
-
-typedef struct node 
+/*
+ * ADTs for Trie and Linked List Nodes
+ */
+typedef struct trie_node 
 {
-    bool stored_word;
-    struct node* children [ALPH_SIZE];
+    char* stored_word;
+    struct trie_node* children [ALPH_SIZE];
 }
-node;
+trie_node;
 
-// global variable for the root node of the trie
-node root = {NULL,{NULL}};
+/*
+ * Root of the Trie
+ */
+trie_node root = {NULL,{NULL}};
+
 
 int main(int argc, char* argv[])
 {
@@ -58,13 +70,13 @@ int main(int argc, char* argv[])
     
     printf("Successfully loaded dictionary.\n");
     
-    if(search("mason"))
-        printf("mason is in the dictionary!\n");
-    else 
-        printf("mason is not in the dictionart :(\n");
+    test("mason");
+    test("butts");
+    test("asdfgh");
     
     if (!unload())
     {
+        printf("Successfully unloaded dictionary.\n");
         return 1;
     }
     return 0;
@@ -77,7 +89,7 @@ void insert(char* word)
 {
     int length = strlen(word);
     // initialize a crawler that starts at the root node
-    node* crawl = &root;
+    trie_node* crawl = &root;
     for(int i = 0; i < length; i++)
     {
         // finds the 0-25 index of the letter
@@ -92,15 +104,15 @@ void insert(char* word)
         // malloc one then crawl to it
         else 
         {
-            crawl->children[index] = calloc(1, sizeof(node));
+            crawl->children[index] = calloc(1, sizeof(trie_node));
+            crawl->children[index]->stored_word = calloc(MAX_LENGTH, sizeof(char));
             crawl = crawl->children[index];
         }
-        // if we are at the last letter of the word, set the bool at this level
-        // to true, to indicate a finished word
+        // if we are at the last character of the word, copy it into the stored
+        // word space of the node
         if (word[i + 1] == '\0')
         {
-            crawl->stored_word = true;
-            printf("stored %s\n", word);
+            strcpy((crawl->stored_word), word);
         }
     };
     return;
@@ -126,26 +138,35 @@ bool load(const char* dictionary)
     return true;
 }
 
+// checks if a given query is stored in the dictionary
 bool search(char* query)
 {
     int length = strlen(query);
-    node* crawl = &root;
+    // initialize a crawler
+    trie_node* crawl = &root;
     for (int i = 0; i < length; i++)
     {
+        // gets the 0-25 index of the letter
         int index = query[i] - 'a';
+        // if there is no pointer at this node for the letter, then the word 
+        // isn't there
         if (crawl->children[index] == NULL)
         {
             return false;
         }
+        // otherwise crawl to the next node
         else crawl = crawl->children[index];
     }
     
-    return crawl->stored_word;
+    // we are now at the last node, where this word should be stored,
+    // so check that the stored word is indeed the query
+    return (strcmp(query, crawl->stored_word) == 0);
 }
 
 // recursive helper function that unloads all children of a pointer to a node
-void unload_recursive(node* n)
+void unload_recursive(trie_node* n)
 {
+    // base case
     if (n == NULL)
     {
         return;
@@ -153,18 +174,22 @@ void unload_recursive(node* n)
     
     for(int i = 0; i < ALPH_SIZE; i++)
     {
+        // if the node has children, unload them first
         if (n->children[i] != NULL)
         {
             unload_recursive(n->children[i]);
             n -> children[i] = NULL;
         }
     }
+    
+    // free the node
     free(n);
 }
 
 // unloads all the children of the root node, resets the root to NULL pointers
 bool unload(void)
 {
+    // recursively unload all the children of the root node
     for(int i = 0; i < ALPH_SIZE; i++)
     {
         unload_recursive(root.children[i]);
@@ -172,4 +197,19 @@ bool unload(void)
     }
     
     return true;
+}
+
+// helper function that tests trie with a given query
+bool test(char* query)
+{
+    if(search(query))
+    {
+        printf("%s is in the dictionary!\n", query);
+        return true;
+    }
+    else 
+    {
+        printf("%s is not in the dictionary :(\n", query);
+        return false;
+    }
 }
