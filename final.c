@@ -49,23 +49,26 @@ bool load(const char* dictionary, trie_node* root);
 void unload(trie_node* n);
 bool search(char* query, trie_node* root);
 bool trie_test(char* query, trie_node* root);
-void list_insert(char* word);
-bool free_list(void);
+list_node* list_insert(char* word, list_node* head);
+bool free_list(list_node* head);
 bool check_alpha(char* word);
-void find_words(int* letters, trie_node* trie, bool last_letter);
+list_node* find_words(int* letters, trie_node* trie, list_node* head, bool last_letter);
 int score_word(char* word, char* list1, char* list2);
-void print_possibilities (list_node* head, char* fuck, char* boy);
+void print_finalists (list_node* head, char* string1, char* string2);
 
-/*
- * Root of linked list
- */
 
-list_node* head = NULL;
 
 char available[LIST_MAX_LENGTH];
 
 int main(int argc, char* argv[])
 {
+    
+    /*
+     * Roots of linked list and trie
+     */
+
+    list_node* head = NULL;
+
     trie_node* root = calloc(1,sizeof(trie_node));
     root->stored_word = NULL;
     
@@ -88,7 +91,7 @@ int main(int argc, char* argv[])
     if (strlen(argv[1]) + strlen(argv[2]) + strlen(argv[3]) 
         != LIST_MAX_LENGTH)
     {
-        printf("Please enter a total of 25 letters.");
+        printf("Please enter a total of 25 letters.\n");
         return 1;
     }
     
@@ -137,16 +140,18 @@ int main(int argc, char* argv[])
         letters[available[i] - 'a']++;
     }
     
-    find_words(letters, root, true);
+    head = find_words(letters, root, head, true);
     
-    print_possibilities(head, argv[1], argv[2]);
+    print_finalists(head, argv[1], argv[2]);
     
-    if (!free_list())
+    
+    
+    if (!free_list(head))
     {
         return 1;
     }
     
-    printf("Successfully freed list.");
+    printf("Successfully freed list.\n");
     
     unload(root);
     
@@ -276,7 +281,7 @@ bool trie_test(char* query, trie_node* root)
 }
 
 // inserts a node into a linked list
-void list_insert(char* word)
+list_node* list_insert(char* word, list_node* head)
 {
     // allocate space for the new node (
     list_node* new_node = malloc(sizeof(list_node));
@@ -284,7 +289,7 @@ void list_insert(char* word)
     if (new_node == NULL)
     {
         printf("Failed to allocate memory.");
-        return;
+        return NULL;
     }
     
     // allocate space to store the new node's word
@@ -305,10 +310,12 @@ void list_insert(char* word)
         new_node->next = head;
         head = new_node;
     }
+    
+    return head;
 }
 
 // frees all memory used by the linked list
-bool free_list(void)
+bool free_list(list_node* head)
 {
     // initialize a list_node pointer to act as a crawler
     list_node* crawler = head;
@@ -325,7 +332,7 @@ bool free_list(void)
     return true;
 }
 
-void find_words(int* letters, trie_node* trie, bool last_letter)
+list_node* find_words(int* letters, trie_node* trie, list_node* head, bool last_letter)
 {
     for (int i = 0; i < ALPH_SIZE; i++)
     {
@@ -333,7 +340,7 @@ void find_words(int* letters, trie_node* trie, bool last_letter)
         {
             last_letter = false;
             letters[i]--;
-            find_words(letters, trie->children[i], true);
+            head = find_words(letters, trie->children[i], head, true);
             letters[i]++; 
         }
         else if (trie->children[i] != NULL)
@@ -343,7 +350,9 @@ void find_words(int* letters, trie_node* trie, bool last_letter)
     }
     
     if (last_letter == true)
-        list_insert(trie->stored_word);
+        head = list_insert(trie->stored_word, head);
+        
+    return head;
 
 }
 
@@ -399,13 +408,39 @@ bool check_alpha(char* word)
     return true;
 }
 
-void print_possibilities (list_node* head, char* fuck, char* boy)
+void print_finalists (list_node* head, char* string1, char* string2)
 {
-    list_node* crawler = head;
-    while (crawler != NULL)
+    int max = 0;
+    list_node* max_node = head;
+    list_node* crawler1 = head;
+    
+    while (crawler1 != NULL)
     {
-        crawler->score = score_word(crawler->stored_word, fuck, boy);
-        printf("%s - %d\n", crawler->stored_word, crawler->score);
-        crawler = crawler->next;
+        crawler1->score = score_word(crawler1->stored_word, string1, string2);
+        
+        if (crawler1->score > max)
+        {
+            max = crawler1->score;
+            max_node = crawler1;
+        }
+        
+        /* while (crawler2 != NULL)
+        {
+            if (count < 10 && crawler1->score < crawler2->score)
+            {
+                list_node* temp = crawler1;
+                temp->next = crawler2;
+            }
+            else if (crawler1->score > crawler2->score)
+        }
+        
+            max = crawler1->score;
+            
+            list_insert(crawler->word, new_head);
+            
+        */
+        
+        crawler1 = crawler1->next;
     }
+    printf("%s - %d\n", max_node->stored_word, max_node->score);
 }
