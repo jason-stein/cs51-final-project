@@ -99,11 +99,16 @@ int main(int argc, char* argv[])
     
     else
     {
-      // concatenate the command line arguments into one string
-      strcat(available, argv[1]);
-      strcat(available, argv[2]);
-      strcat(available, argv[3]);
-      printf("Available letters: %s\n", available); 
+        // concatenate the command line arguments into one string
+        strcat(available, argv[1]);
+        strcat(available, argv[2]);
+        strcat(available, argv[3]);
+        // make all letters lowercase for convenience
+        for(int i = 0, length = strlen(available); i < length; i++)
+        {
+            available[i] = tolower(available[i]);
+        }
+        printf("Available letters: %s\n", available); 
     }
     
     // attempt to load the dictionary
