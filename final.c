@@ -335,6 +335,10 @@ void find_words(int* letters, trie_node* trie, bool last_letter)
             find_words(letters, trie->children[i], true);
             letters[i]++; 
         }
+        else if (trie->children[i] != NULL)
+        {
+            last_letter = false;
+        }
     }
     
     if (last_letter == true)
@@ -358,7 +362,8 @@ void print_possibilities (list_node* head)
     list_node* crawler = head;
     while (crawler != NULL)
     {
-        printf("%s\n", crawler->stored_word);
+        crawler->score = score_word(crawler->stored_word);
+        printf("%s - %d\n", crawler->stored_word, crawler->score);
         crawler = crawler->next;
     }
 }
