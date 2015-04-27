@@ -22,16 +22,7 @@
 #define LIST_MAX_LENGTH 25
 #define DICTIONARY "words.txt"
 
-/*
- * Function Prototypes
- */
-void trie_insert(char* word);
-bool load(const char* dictionary);
-bool unload (void);
-bool search(char* query);
-bool trie_test(char* query);
-void list_insert(char* word);
-bool free_list(void);
+
 
 /*
  * ADTs for Trie and Linked List Nodes
@@ -50,6 +41,18 @@ typedef struct list_node
     struct list_node* next;
 }
 list_node;
+
+/*
+ * Function Prototypes
+ */
+void trie_insert(char* word);
+bool load(const char* dictionary);
+bool unload (void);
+bool search(char* query);
+bool trie_test(char* query);
+void list_insert(char* word);
+bool free_list(void);
+void find_words(char* letters, trie_node* trie, bool last_letter);
 
 /*
  * Roots of the trie and linked list
@@ -108,11 +111,28 @@ int main(int argc, char* argv[])
     trie_test("butts");
     trie_test("asdfgh");
     
-    if (!unload())
+    int letters[ALPH_SIZE] = {0};
+    
+    for (int i = 0; i < strlen(available); i++)
     {
-        printf("Successfully unloaded dictionary.\n");
+        letters[available[i] - 'a']++;
+    }
+    
+    //find_words(letters, root, true);
+    
+    if (!free_list())
+    {
         return 1;
     }
+    
+    printf("Successfully freed list.");
+    
+    if (!unload())
+    {
+        return 1;
+    }
+    
+    printf("Successfully unloaded dictionary.\n");
     return 0;
  
 
@@ -288,4 +308,21 @@ bool free_list(void)
     }
     
     return true;
+}
+
+void find_words(char* letters, trie_node* trie, bool last_letter)
+{
+    for (int i = 0; i < ALPH_SIZE; i++)
+    {
+        if (letters[i] > 0 && trie->children[i] != NULL)
+        {
+            last_letter = false;
+            letters[i]--;
+            find_words(letters, trie->children[i], true);
+            letters[i]++; 
+        }
+    }
+    
+    if (last_letter == true)
+        list_insert(trie->stored_word);
 }
