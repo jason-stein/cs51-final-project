@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <ctype.h>
 
 /*
  * Global Constants
@@ -21,8 +22,6 @@
 #define DICT_MAX_LENGTH 45
 #define LIST_MAX_LENGTH 25
 #define DICTIONARY "words.txt"
-
-
 
 /*
  * ADTs for Trie and Linked List Nodes
@@ -45,28 +44,30 @@ list_node;
 /*
  * Function Prototypes
  */
-void trie_insert(char* word);
-bool load(const char* dictionary);
-bool unload (void);
-bool search(char* query);
-bool trie_test(char* query);
+void trie_insert(char* word, trie_node* root);
+bool load(const char* dictionary, trie_node* root);
+void unload(trie_node* n);
+bool search(char* query, trie_node* root);
+bool trie_test(char* query, trie_node* root);
 void list_insert(char* word);
 bool free_list(void);
-void find_words(char* letters, trie_node* trie, bool last_letter);
+bool check_alpha(char* word);
+void find_words(int* letters, trie_node* trie, bool last_letter);
 
 /*
- * Roots of the trie and linked list
+ * Root of linked list
  */
-trie_node root = {NULL,{NULL}};
 
 list_node* head = NULL;
 
 char available[LIST_MAX_LENGTH];
 
-
 int main(int argc, char* argv[])
 {
-    // parse user input
+    trie_node* root = calloc(1,sizeof(trie_node));
+    root->stored_word = NULL;
+    
+    // check usage
     if (argc != 4)
     {
     
@@ -81,25 +82,39 @@ int main(int argc, char* argv[])
         return 1;
     }
     
-    
     // make sure the user enters the right number of letters
     if (strlen(argv[1]) + strlen(argv[2]) + strlen(argv[3]) 
-        != LIST_MAX_LENGTH * sizeof(char))
+        != LIST_MAX_LENGTH)
     {
         printf("Please enter a total of 25 letters.");
         return 1;
     }
     
+    // and check that they're all letters
+    else 
+        if (!check_alpha(argv[1]) || !check_alpha(argv[1]) 
+            || !check_alpha(argv[1]))
+        {
+            printf("Please only enter letters!\n");
+            return 1;
+        }
+    // if input is valid, parse arguments
     else
     {
-      // concatenate the command line arguments into one string
-      strcat(available, argv[1]);
-      strcat(available, argv[2]);
-      strcat(available, argv[3]);
-      printf("Available letters: %s\n", available); 
+        // concatenate the command line arguments into one string
+        strcat(available, argv[1]);
+        strcat(available, argv[2]);
+        strcat(available, argv[3]);
+        // make all letters lowercase for convenience
+        for(int i = 0, length = strlen(available); i < length; i++)
+        {
+            available[i] = tolower(available[i]);
+        }
+        printf("Available letters: %s\n", available); 
     }
     
-    if (!load(DICTIONARY))
+    // attempt to load the dictionary
+    if (!load(DICTIONARY, root))
     {
         printf("error: failed to load dictionary\n");
         return 1;
@@ -107,9 +122,11 @@ int main(int argc, char* argv[])
     
     printf("Successfully loaded dictionary.\n");
     
-    trie_test("mason");
-    trie_test("butts");
-    trie_test("asdfgh");
+    // some tests
+    trie_test("mason", root);
+    trie_test("butts", root);
+    trie_test("agammaglobulinemias", root);
+    trie_test("asdfgh", root);
     
     int letters[ALPH_SIZE] = {0};
     
@@ -118,7 +135,7 @@ int main(int argc, char* argv[])
         letters[available[i] - 'a']++;
     }
     
-    //find_words(letters, root, true);
+    find_words(letters, root, true);
     
     if (!free_list())
     {
@@ -127,10 +144,7 @@ int main(int argc, char* argv[])
     
     printf("Successfully freed list.");
     
-    if (!unload())
-    {
-        return 1;
-    }
+    unload(root);
     
     printf("Successfully unloaded dictionary.\n");
     return 0;
@@ -139,11 +153,11 @@ int main(int argc, char* argv[])
 }
 
 // inserts a single word into the trie
-void trie_insert(char* word)
+void trie_insert(char* word, trie_node* root)
 {
     int length = strlen(word);
     // initialize a crawler that starts at the root node
-    trie_node* crawl = &root;
+    trie_node* crawl = root;
     for(int i = 0; i < length; i++)
     {
         // finds the 0-25 index of the letter
@@ -174,7 +188,7 @@ void trie_insert(char* word)
 }
 
 // loads an entire dictionary into the trie
-bool load(const char* dictionary)
+bool load(const char* dictionary, trie_node* root)
 {
     // attempt to open the dictionary filepath in read mode
     FILE* dict = fopen(dictionary, "r");
@@ -187,18 +201,18 @@ bool load(const char* dictionary)
     char word [DICT_MAX_LENGTH];
     while((fscanf(dict, "%s", word)) == 1)
     {
-        trie_insert(word);
+        trie_insert(word, root);
     }
     
     return true;
 }
 
 // checks if a given query is stored in the dictionary
-bool search(char* query)
+bool search(char* query, trie_node* root)
 {
     int length = strlen(query);
     // initialize a crawler
-    trie_node* crawl = &root;
+    trie_node* crawl = root;
     for (int i = 0; i < length; i++)
     {
         // gets the 0-25 index of the letter
@@ -219,7 +233,7 @@ bool search(char* query)
 }
 
 // recursive helper function that unloads all children of a pointer to a node
-void unload_recursive(trie_node* n)
+void unload(trie_node* n)
 {
     // base case
     if (n == NULL)
@@ -232,32 +246,20 @@ void unload_recursive(trie_node* n)
         // if the node has children, unload them first
         if (n->children[i] != NULL)
         {
-            unload_recursive(n->children[i]);
-            n -> children[i] = NULL;
+            unload(n->children[i]);
+            n->children[i] = NULL;
         }
     }
     
     // free the node
+    free(n->stored_word);
     free(n);
-}
-
-// unloads all the children of the root node, resets the root to NULL pointers
-bool unload(void)
-{
-    // recursively unload all the children of the root node
-    for(int i = 0; i < ALPH_SIZE; i++)
-    {
-        unload_recursive(root.children[i]);
-        root.children[i] = NULL;
-    }
     
-    return true;
 }
 
-// helper function that tests trie with a given query
-bool trie_test(char* query)
+bool trie_test(char* query, trie_node* root)
 {
-    if(search(query))
+    if(search(query, root))
     {
         printf("%s is in the dictionary!\n", query);
         return true;
@@ -269,8 +271,10 @@ bool trie_test(char* query)
     }
 }
 
+// inserts a node into a linked list
 void list_insert(char* word)
 {
+    // allocate space for the new node (
     list_node* new_node = malloc(sizeof(list_node));
     
     if (new_node == NULL)
@@ -279,15 +283,19 @@ void list_insert(char* word)
         return;
     }
     
+    // allocate space to store the new node's word
     new_node->stored_word = calloc(LIST_MAX_LENGTH, sizeof(char));
     
+    // store the word in the node
     strcpy(new_node->stored_word, word);
     
+    // base case for empty list
     if (head == NULL)
     {
         new_node->next = NULL;
         head = new_node;
     }
+    // insert into existing list
     else
     {
         new_node->next = head;
@@ -295,10 +303,13 @@ void list_insert(char* word)
     }
 }
 
+// frees all memory used by the linked list
 bool free_list(void)
 {
+    // initialize a list_node pointer to act as a crawler
     list_node* crawler = head;
     
+    // crawl through the list, freeing all memory
     while (crawler != NULL)
     {
         list_node* temp = crawler;
@@ -310,7 +321,7 @@ bool free_list(void)
     return true;
 }
 
-void find_words(char* letters, trie_node* trie, bool last_letter)
+void find_words(int* letters, trie_node* trie, bool last_letter)
 {
     for (int i = 0; i < ALPH_SIZE; i++)
     {
@@ -325,4 +336,16 @@ void find_words(char* letters, trie_node* trie, bool last_letter)
     
     if (last_letter == true)
         list_insert(trie->stored_word);
+
+}
+
+bool check_alpha(char* word)
+{
+    for(int i = 0, length = strlen(word); i < length; i++)
+    {
+        if(!isalpha(word[i]))
+            return false;
+    }
+    
+    return true;
 }
