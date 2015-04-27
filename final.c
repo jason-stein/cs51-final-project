@@ -65,7 +65,7 @@ char available[LIST_MAX_LENGTH];
 
 int main(int argc, char* argv[])
 {
-    // parse user input
+    // check usage
     if (argc != 4)
     {
     
@@ -83,12 +83,13 @@ int main(int argc, char* argv[])
     
     // make sure the user enters the right number of letters
     if (strlen(argv[1]) + strlen(argv[2]) + strlen(argv[3]) 
-        != LIST_MAX_LENGTH * sizeof(char))
+        != LIST_MAX_LENGTH)
     {
         printf("Please enter a total of 25 letters.");
         return 1;
     }
     
+    // and check that they're all letters
     else 
         if (!check_alpha(argv[1]) || !check_alpha(argv[1]) 
             || !check_alpha(argv[1]))
@@ -96,7 +97,7 @@ int main(int argc, char* argv[])
             printf("Please only enter letters!\n");
             return 1;
         }
-    
+    // if input is valid, parse arguments
     else
     {
         // concatenate the command line arguments into one string
@@ -123,6 +124,7 @@ int main(int argc, char* argv[])
     // some tests
     trie_test("mason");
     trie_test("butts");
+    trie_test("agammaglobulinemias");
     trie_test("asdfgh");
     
     // unload the dictionary
