@@ -54,7 +54,7 @@ bool free_list(void);
 bool check_alpha(char* word);
 void find_words(int* letters, trie_node* trie, bool last_letter);
 int score_word(char* word, char* list1, char* list2);
-void print_possibilities (list_node* head);
+void print_possibilities (list_node* head, char* fuck, char* boy);
 
 /*
  * Root of linked list
@@ -79,8 +79,8 @@ int main(int argc, char* argv[])
          * 3) Dark red space and blue space letters (not up-for-grabs--won't improve score if used)
          */
         
-        printf("Usage: ./final UnclaimedString "\
-        "OpponentPotentialString OpponentBlockedAndPlayer'sString \n");
+        printf("Usage: ./final OpponentPotentialString "\
+        "UnclaimedString OpponentBlockedAndPlayer'sString \n");
         return 1;
     }
     
@@ -139,7 +139,7 @@ int main(int argc, char* argv[])
     
     find_words(letters, root, true);
     
-    print_possibilities(head);
+    print_possibilities(head, argv[1], argv[2]);
     
     if (!free_list())
     {
@@ -399,12 +399,12 @@ bool check_alpha(char* word)
     return true;
 }
 
-void print_possibilities (list_node* head)
+void print_possibilities (list_node* head, char* fuck, char* boy)
 {
     list_node* crawler = head;
     while (crawler != NULL)
     {
-        crawler->score = score_word(crawler->stored_word);
+        crawler->score = score_word(crawler->stored_word, fuck, boy);
         printf("%s - %d\n", crawler->stored_word, crawler->score);
         crawler = crawler->next;
     }
