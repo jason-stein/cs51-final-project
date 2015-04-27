@@ -53,6 +53,7 @@ void list_insert(char* word);
 bool free_list(void);
 bool check_alpha(char* word);
 void find_words(int* letters, trie_node* trie, bool last_letter);
+void print_possibilities (list_node* head);
 
 /*
  * Root of linked list
@@ -136,6 +137,8 @@ int main(int argc, char* argv[])
     }
     
     find_words(letters, root, true);
+    
+    print_possibilities(head);
     
     if (!free_list())
     {
@@ -348,4 +351,14 @@ bool check_alpha(char* word)
     }
     
     return true;
+}
+
+void print_possibilities (list_node* head)
+{
+    list_node* crawler = head;
+    while (crawler != NULL)
+    {
+        printf("%s\n", crawler->stored_word);
+        crawler = crawler->next;
+    }
 }
