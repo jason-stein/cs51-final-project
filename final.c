@@ -24,18 +24,6 @@
 #define DICTIONARY "words.txt"
 
 /*
- * Function Prototypes
- */
-void trie_insert(char* word);
-bool load(const char* dictionary);
-bool unload (void);
-bool search(char* query);
-bool trie_test(char* query);
-void list_insert(char* word);
-bool free_list(void);
-bool check_alpha(char* word);
-
-/*
  * ADTs for Trie and Linked List Nodes
  */
 typedef struct trie_node 
@@ -54,9 +42,22 @@ typedef struct list_node
 list_node;
 
 /*
+ * Function Prototypes
+ */
+void trie_insert(char* word, trie_node* root);
+bool load(const char* dictionary, trie_node* root);
+void unload_recursive(trie_node* n);
+bool search(char* query, trie_node* root);
+bool trie_test(char* query, trie_node* root);
+void list_insert(char* word);
+bool free_list(void);
+bool check_alpha(char* word);
+
+
+
+/*
  * Roots of the trie and linked list
  */
-trie_node root = {NULL,{NULL}};
 
 list_node* head = NULL;
 
@@ -65,6 +66,9 @@ char available[LIST_MAX_LENGTH];
 
 int main(int argc, char* argv[])
 {
+    trie_node* root = calloc(1,sizeof(trie_node));
+    root->stored_word = NULL;
+    
     // check usage
     if (argc != 4)
     {
@@ -113,7 +117,7 @@ int main(int argc, char* argv[])
     }
     
     // attempt to load the dictionary
-    if (!load(DICTIONARY))
+    if (!load(DICTIONARY, root))
     {
         printf("error: failed to load dictionary\n");
         return 1;
@@ -122,28 +126,25 @@ int main(int argc, char* argv[])
     printf("Successfully loaded dictionary.\n");
     
     // some tests
-    trie_test("mason");
-    trie_test("butts");
-    trie_test("agammaglobulinemias");
-    trie_test("asdfgh");
+    trie_test("mason", root);
+    trie_test("butts", root);
+    trie_test("agammaglobulinemias", root);
+    trie_test("asdfgh", root);
     
     // unload the dictionary
-    if (!unload())
-    {
-        printf("Successfully unloaded dictionary.\n");
-        return 1;
-    }
+    unload_recursive(root);
+    
     return 0;
  
 
 }
 
 // inserts a single word into the trie
-void trie_insert(char* word)
+void trie_insert(char* word, trie_node* root)
 {
     int length = strlen(word);
     // initialize a crawler that starts at the root node
-    trie_node* crawl = &root;
+    trie_node* crawl = root;
     for(int i = 0; i < length; i++)
     {
         // finds the 0-25 index of the letter
@@ -174,7 +175,7 @@ void trie_insert(char* word)
 }
 
 // loads an entire dictionary into the trie
-bool load(const char* dictionary)
+bool load(const char* dictionary, trie_node* root)
 {
     // attempt to open the dictionary filepath in read mode
     FILE* dict = fopen(dictionary, "r");
@@ -187,18 +188,18 @@ bool load(const char* dictionary)
     char word [DICT_MAX_LENGTH];
     while((fscanf(dict, "%s", word)) == 1)
     {
-        trie_insert(word);
+        trie_insert(word, root);
     }
     
     return true;
 }
 
 // checks if a given query is stored in the dictionary
-bool search(char* query)
+bool search(char* query, trie_node* root)
 {
     int length = strlen(query);
     // initialize a crawler
-    trie_node* crawl = &root;
+    trie_node* crawl = root;
     for (int i = 0; i < length; i++)
     {
         // gets the 0-25 index of the letter
@@ -242,23 +243,9 @@ void unload_recursive(trie_node* n)
     free(n);
 }
 
-// unloads all the children of the root node, resets the root to NULL pointers
-bool unload(void)
+bool trie_test(char* query, trie_node* root)
 {
-    // recursively unload all the children of the root node
-    for(int i = 0; i < ALPH_SIZE; i++)
-    {
-        unload_recursive(root.children[i]);
-        root.children[i] = NULL;
-    }
-    
-    return true;
-}
-
-// helper function that tests trie with a given query
-bool trie_test(char* query)
-{
-    if(search(query))
+    if(search(query, root))
     {
         printf("%s is in the dictionary!\n", query);
         return true;
