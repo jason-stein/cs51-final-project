@@ -53,6 +53,7 @@ void list_insert(char* word);
 bool free_list(void);
 bool check_alpha(char* word);
 void find_words(int* letters, trie_node* trie, bool last_letter);
+int score_word(char* word, char* list1, char* list2);
 void print_possibilities (list_node* head);
 
 /*
@@ -342,6 +343,47 @@ void find_words(int* letters, trie_node* trie, bool last_letter)
 
 }
 
+// Finds the score for a word:
+
+// By Letterpress rules, taking a letter from the opponent (any letter from
+// list1) is worth 2 points, because it adds one to your score and subtracts 1 
+// from the opponent. Using unclaimed letters (letters in list2) is worth 1 point 
+int score_word(char* word, char* list1, char* list2)
+{
+    int score = 0;
+    // sets of 26 "buckets" for letters -- tracks the number available of each letter
+    int list1_counts[ALPH_SIZE] = {0};
+    int list2_counts[ALPH_SIZE] = {0};
+    // Fill the "buckets" -- for each letter, increment bucket value by 1.
+    for(int i = 0, length = strlen(list1); i < length; i++)
+    {
+        list1_counts[list1[i] - 'a']++;
+    }
+    for(int i = 0, length = strlen(list2); i < length; i++)
+    {
+        list2_counts[list2[i] - 'a']++;
+    }
+    // For each letter, check if it's in list1 if yes, add 2 to score and decrement that
+    // letter's bucket. If not, check list2 and add 1 to score. Otherwise, the letter 
+    // has no value.
+    for(int i = 0, length = strlen(word); i < length; i++)
+    {
+        if(list1_counts[word[i] - 'a'] != 0)
+        {
+            score += 2;
+            list1_counts[word[i] - 'a']--;
+        }
+        else if (list2_counts[word[i] - 'a'] != 0)
+        {
+            score += 1;
+            list2_counts[word[i] - 'a']--;
+        }
+    }
+    
+    return score;
+}
+
+// Makes sure a string is just letters.
 bool check_alpha(char* word)
 {
     for(int i = 0, length = strlen(word); i < length; i++)
