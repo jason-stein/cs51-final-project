@@ -240,7 +240,6 @@ bool load(const char* dictionary, trie_node* root)
 // checks if a given query is stored in the dictionary
 bool search(char* query, trie_node* root)
 {
-    int length = strlen(query);
     // initialize a crawler
     trie_node* crawl = root;
     // the offset represents how many characters from stored substring we 
