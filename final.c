@@ -84,6 +84,8 @@ char available[LIST_MAX_LENGTH];
 int main(int argc, char* argv[])
 {
     
+    printf("%d",sizeof(queue));
+    
     // trie root 
     trie_node* root = calloc(1,sizeof(trie_node));
     root->stored_word = NULL;
@@ -368,6 +370,10 @@ bool free_list(list_node* head)
 list_node* find_words(int* letters, trie_node* trie, list_node* head)
 {
 
+    // there is a word to store at this level of the trie, so store it
+    if (trie->stored_word != NULL && strlen(trie->stored_word) != 0)
+        head = list_insert(trie->stored_word, head);
+
     // iterates through all of the user's possible letters and all of the 
     // current trie node's pointers simultaneously 
     for (int i = 0; i < ALPH_SIZE; i++)
@@ -384,10 +390,6 @@ list_node* find_words(int* letters, trie_node* trie, list_node* head)
         
     } 
     
-    // there is a word to store at this level of the trie, so store it
-    if (trie->stored_word != NULL)
-        head = list_insert(trie->stored_word, head);
-      
     return head;
 
 }
@@ -477,20 +479,20 @@ queue find_finalists (list_node* head, queue q, char* string1, char* string2)
             min_required = q.rear->score;
         }
         
-        //printf("%s - %d\n", crawler->stored_word, crawler->score);
+        // printf("%s - %d\n", crawler->stored_word, crawler->score);
         crawler = crawler->next;
     }
 
     
-    print_finalists(q.front);
+    //print_finalists(q.front);
     return q;
 }
 
 queue enqueue (queue q, list_node* node)
 {
-    list_node* temp = calloc(1, sizeof(list_node));
-    temp->score = node->score;
-    temp->stored_word = node->stored_word;
+    list_node* new_node = calloc(1, sizeof(list_node));
+    new_node->score = node->score;
+    new_node->stored_word = node->stored_word;
     
     list_node* crawler1 = q.front;
     list_node* crawler2 = q.front;
@@ -498,16 +500,16 @@ queue enqueue (queue q, list_node* node)
     
     if (q.front == NULL)
     {
-        q.front = temp;
-        q.rear = temp;
+        q.front = new_node;
+        q.rear = new_node;
         //q.rear->next = q.front;
         return q;
     }
     
     if (node->score >= q.front->score)
     {
-        temp->next = q.front;
-        q.front = temp;
+        new_node->next = q.front;
+        q.front = new_node;
         return q;
     }
     // loop below has an issue...
@@ -515,8 +517,8 @@ queue enqueue (queue q, list_node* node)
     {
         if (node->score >= crawler1->score)
         {
-            temp->next = crawler1;
-            crawler2->next = temp;
+            new_node->next = crawler1;
+            crawler2->next = new_node;
             return q;
         }
         
@@ -524,8 +526,8 @@ queue enqueue (queue q, list_node* node)
         crawler1 = crawler1->next;
     }
     
-    crawler2->next = temp;
-    q.rear = temp;
+    crawler2->next = new_node;
+    q.rear = new_node;
     
     return q;
 }
