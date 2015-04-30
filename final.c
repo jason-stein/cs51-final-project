@@ -14,6 +14,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <ctype.h>
+#include <assert.h>
 
 /*
  * Global Constants
@@ -144,10 +145,10 @@ int main(int argc, char* argv[])
     printf("Successfully loaded dictionary.\n");
     
     // some tests
-    trie_test("mason", root);
-    trie_test("butts", root);
-    trie_test("agammaglobulinemias", root);
-    trie_test("asdfgh", root);
+    assert(trie_test("mason", root));
+    assert(trie_test("butts", root));
+    assert(trie_test("agammaglobulinemias", root));
+    assert(!trie_test("asdfgh", root));
     
     int letters[ALPH_SIZE] = {0};
     
@@ -281,18 +282,10 @@ void unload(trie_node* n)
     
 }
 
+// simple boolean test function to make sure the trie is working properly
 bool trie_test(char* query, trie_node* root)
 {
-    if(search(query, root))
-    {
-        printf("%s is in the dictionary!\n", query);
-        return true;
-    }
-    else 
-    {
-        printf("%s is not in the dictionary :(\n", query);
-        return false;
-    }
+    return(search(query, root));
 }
 
 // inserts a node into a linked list
