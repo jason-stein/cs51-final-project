@@ -22,6 +22,7 @@
 #define DICT_MAX_LENGTH 45
 #define LIST_MAX_LENGTH 25
 #define DICTIONARY "words.txt"
+#define RESULTS 25
 
 /*
  * ADTs for Trie and Linked List Nodes
@@ -41,21 +42,35 @@ typedef struct list_node
 }
 list_node;
 
-/*
- * Function Prototypes
- */
+typedef struct queue
+{
+    list_node* front;
+    list_node* rear;
+}queue;
+
+// trie function prototypes 
 void trie_insert(char* word, trie_node* root);
 bool load(const char* dictionary, trie_node* root);
 void unload(trie_node* n);
 bool search(char* query, trie_node* root);
 bool trie_test(char* query, trie_node* root);
+
+// list function prototypes 
 list_node* list_insert(char* word, list_node* head);
 bool free_list(list_node* head);
+
+// queue function prototypes
+queue enqueue (queue q, list_node* node);
+queue dequeue (queue q);
+
+// user input function prototype
 bool check_alpha(char* word);
+
+// general functionality prototypes
 list_node* find_words(int* letters, trie_node* trie, list_node* head, bool last_letter);
 int score_word(char* word, char* list1, char* list2);
-void print_finalists (list_node* head, char* string1, char* string2);
-
+queue find_finalists (list_node* head, queue q, char* string1, char* string2);
+void print_finalists (list_node* front);
 
 
 char available[LIST_MAX_LENGTH];
@@ -63,14 +78,15 @@ char available[LIST_MAX_LENGTH];
 int main(int argc, char* argv[])
 {
     
-    /*
-     * Roots of linked list and trie
-     */
-
-    list_node* head = NULL;
-
+    // trie root 
     trie_node* root = calloc(1,sizeof(trie_node));
     root->stored_word = NULL;
+    
+    // all possible words linked list head
+    list_node* head = NULL;
+
+    // queue for finalists (top 25) linked list nodes
+    queue q = {NULL, NULL};
     
     // check usage
     if (argc != 4)
@@ -142,16 +158,15 @@ int main(int argc, char* argv[])
     
     head = find_words(letters, root, head, true);
     
-    print_finalists(head, argv[1], argv[2]);
+    q = find_finalists(head, q, argv[1], argv[2]);
     
     
-    
-    if (!free_list(head))
+    if (!free_list(head) /*|| !free_list(q.front)*/)
     {
         return 1;
     }
     
-    printf("Successfully freed list.\n");
+    printf("Successfully freed lists.\n");
     
     unload(root);
     
@@ -408,39 +423,138 @@ bool check_alpha(char* word)
     return true;
 }
 
-void print_finalists (list_node* head, char* string1, char* string2)
+queue find_finalists (list_node* head, queue q, char* string1, char* string2)
 {
-    int max = 0;
-    list_node* max_node = head;
-    list_node* crawler1 = head;
+    // int max = 0;
+    // list_node* max_node = head;
+    list_node* crawler = head;
     
+    // continues to increment until hitting 25, at which point nodes' scores
+    // are taken into account before inserting into list
+    int count = 0;
+    
+    // number defining the lowest value for something to get on the list
+    int min_required = 0;
+    
+    while (crawler != NULL)
+    {
+        crawler->score = score_word(crawler->stored_word, string1, string2);
+        
+        /*if (crawler->score > max)
+        {
+            max = crawler->score;
+            max_node = crawler;
+        }*/
+        
+        if (count < RESULTS)
+        {
+            q = enqueue(q, crawler);
+            
+            min_required = q.rear->score;
+            /*
+            if (count == 0)
+            {
+                min_required = crawler->score;
+            }
+            else if (crawler->score < min_required)
+            {
+                min_required = crawler->score;
+            }*/
+            
+            count++;
+        } 
+        else if (crawler->score > min_required)
+        {
+            //print_finalists(q.front);
+            q = enqueue(q, crawler);
+            q = dequeue(q);
+            min_required = q.rear->score;
+        }
+        
+        //printf("%s - %d\n", crawler->stored_word, crawler->score);
+        crawler = crawler->next;
+    }
+
+    
+    print_finalists(q.front);
+    return q;
+}
+
+queue enqueue (queue q, list_node* node)
+{
+    list_node* temp = calloc(1, sizeof(list_node));
+    temp->score = node->score;
+    temp->stored_word = node->stored_word;
+    
+    list_node* crawler1 = q.front;
+    list_node* crawler2 = q.front;
+    // crawler2->next = crawler1;
+    
+    if (q.front == NULL)
+    {
+        q.front = temp;
+        q.rear = temp;
+        //q.rear->next = q.front;
+        return q;
+    }
+    
+    if (node->score >= q.front->score)
+    {
+        temp->next = q.front;
+        q.front = temp;
+        return q;
+    }
+    // loop below has an issue...
     while (crawler1 != NULL)
     {
-        crawler1->score = score_word(crawler1->stored_word, string1, string2);
-        
-        if (crawler1->score > max)
+        if (node->score >= crawler1->score)
         {
-            max = crawler1->score;
-            max_node = crawler1;
+            temp->next = crawler1;
+            crawler2->next = temp;
+            return q;
         }
         
-        /* while (crawler2 != NULL)
-        {
-            if (count < 10 && crawler1->score < crawler2->score)
-            {
-                list_node* temp = crawler1;
-                temp->next = crawler2;
-            }
-            else if (crawler1->score > crawler2->score)
-        }
-        
-            max = crawler1->score;
-            
-            list_insert(crawler->word, new_head);
-            
-        */
-        
+        crawler2 = crawler1;
         crawler1 = crawler1->next;
     }
-    printf("%s - %d\n", max_node->stored_word, max_node->score);
+    
+    crawler2->next = temp;
+    q.rear = temp;
+    
+    return q;
+}
+
+queue dequeue (queue q)
+{
+    list_node* crawler = q.front;
+    
+    while (crawler != NULL)
+    {
+        if (crawler->next == q.rear)
+        {
+            crawler->next = NULL;
+            
+            free(q.rear);
+            
+            q.rear = crawler;
+            return q;
+        }
+        
+        crawler = crawler->next;
+    }
+    
+    return q;
+}
+
+void print_finalists (list_node* front)
+{
+    list_node* crawler = front;
+    int number = 1;
+    
+    while (crawler != NULL)
+    {
+        printf("%d. %s - %d\n", number, crawler->stored_word, crawler->score);
+        crawler = crawler->next;
+        number++;
+    }
 }
