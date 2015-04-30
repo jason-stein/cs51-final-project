@@ -30,6 +30,7 @@
  */
 typedef struct trie_node 
 {
+    char* substring;
     char* stored_word;
     struct trie_node* children [ALPH_SIZE];
 }
@@ -55,6 +56,10 @@ bool load(const char* dictionary, trie_node* root);
 void unload(trie_node* n);
 bool search(char* query, trie_node* root);
 
+// radix tree function prototypes
+int only_child(trie_node* node);
+trie_node* radix_collapse(trie_node* node);
+
 // list function prototypes 
 list_node* list_insert(char* word, list_node* head);
 bool free_list(list_node* head);
@@ -77,8 +82,6 @@ char available[LIST_MAX_LENGTH];
 
 int main(int argc, char* argv[])
 {
-    
-    printf("%d",sizeof(queue));
     
     // trie root 
     trie_node* root = calloc(1,sizeof(trie_node));
@@ -158,6 +161,26 @@ int main(int argc, char* argv[])
         letters[available[i] - 'a']++;
     }
     
+/*    head = find_words(letters, root, head);
+    
+    q = find_finalists(head, q, argv[1], argv[2]);
+    
+    if (!free_list(head) || !free_list(q.front))
+    {
+        return 1;
+    }
+ */   
+    // printf("Successfully freed lists.\n");
+    
+    // head = NULL;
+    
+    root = radix_collapse(root);
+    
+    assert(search("mason", root));
+    assert(search("butts", root));
+    assert(search("agammaglobulinemias", root));
+    assert(!search("asdfgh", root));
+   
     head = find_words(letters, root, head);
     
     q = find_finalists(head, q, argv[1], argv[2]);
@@ -166,10 +189,6 @@ int main(int argc, char* argv[])
     {
         return 1;
     }
-    
-    printf("Successfully freed lists.\n");
-    
-    head = NULL;
    
     unload(root);
     
@@ -239,10 +258,30 @@ bool search(char* query, trie_node* root)
 {
     // initialize a crawler
     trie_node* crawl = root;
-    for (int i = 0; query[i] != '\0'; i++)
+    // the offset represents how many characters from stored substring we 
+    // have crawled. in a trie it will always be 0, but in the radix tree
+    // it will increase every time we hit a substring
+    int offset = 0;
+    for (int i = 0; query[i + offset] != '\0'; i++)
     {
+        if(crawl->substring != NULL)
+        {
+            int sub_length = strlen(crawl->substring);
+            // crawl through the substring, checking each letter of the query
+            // at the point we're at against the substring
+            for(int j = 0; j < sub_length; j++)
+            {
+                if (query[i + j + offset] != crawl->substring[j])
+                {
+                    return false;
+                }
+            }
+            // if the subsection of the query lines up with the stored
+            // substring, increase the offset and continue down the tree
+            offset += sub_length;
+        }
         // gets the 0-25 index of the letter
-        int index = query[i] - 'a';
+        int index = query[i + offset] - 'a';
         // if there is no pointer at this node for the letter, then the word 
         // isn't there
         if (crawl->children[index] == NULL)
@@ -278,6 +317,7 @@ void unload(trie_node* n)
     }
     
     // free all parts of the node
+    free(n->substring);
     free(n->stored_word);
     free(n);
     
@@ -337,11 +377,14 @@ bool free_list(list_node* head)
 
 list_node* find_words(int* letters, trie_node* trie, list_node* head)
 {
-
-    // there is a word to store at this level of the trie, so store it
-    if (trie->stored_word != NULL && strlen(trie->stored_word) != 0)
-        head = list_insert(trie->stored_word, head);
-
+    if(trie->substring != NULL)
+    {
+        for (int j = 0; trie->substring[j] != '\0'; j++)
+        {
+            int index = trie->substring[j] - 'a';
+            letters[index]--;
+        }
+    }
     // iterates through all of the user's possible letters and all of the 
     // current trie node's pointers simultaneously 
     for (int i = 0; i < ALPH_SIZE; i++)
@@ -354,11 +397,24 @@ list_node* find_words(int* letters, trie_node* trie, list_node* head)
             letters[i]--;
             head = find_words(letters, trie->children[i], head);
             letters[i]++; 
-        }  
-        
-    } 
-    
             
+        }
+    }
+    // make sure we had enough letters to spell out the substring
+    bool enough_letters = true;
+    for (int i = 0; i < ALPH_SIZE; i++)
+    {
+        if (letters[i] < 0)
+            enough_letters = false;
+    }
+    
+    // there is a word to store at this level of the trie, so store it
+    if (enough_letters == true && trie->stored_word != NULL 
+        && strlen(trie->stored_word) != 0)
+    {
+        printf("%s\n",trie->stored_word);
+        head = list_insert(trie->stored_word, head);
+    }
     return head;
 
 }
@@ -448,20 +504,20 @@ queue find_finalists (list_node* head, queue q, char* string1, char* string2)
             min_required = q.rear->score;
         }
         
-        // printf("%s - %d\n", crawler->stored_word, crawler->score);
+        //printf("%s - %d\n", crawler->stored_word, crawler->score);
         crawler = crawler->next;
     }
 
     
-    //print_finalists(q.front);
+    print_finalists(q.front);
     return q;
 }
 
 queue enqueue (queue q, list_node* node)
 {
-    list_node* new_node = calloc(1, sizeof(list_node));
-    new_node->score = node->score;
-    new_node->stored_word = node->stored_word;
+    list_node* temp = calloc(1, sizeof(list_node));
+    temp->score = node->score;
+    temp->stored_word = node->stored_word;
     
     list_node* crawler1 = q.front;
     list_node* crawler2 = q.front;
@@ -469,16 +525,16 @@ queue enqueue (queue q, list_node* node)
     
     if (q.front == NULL)
     {
-        q.front = new_node;
-        q.rear = new_node;
+        q.front = temp;
+        q.rear = temp;
         //q.rear->next = q.front;
         return q;
     }
     
     if (node->score >= q.front->score)
     {
-        new_node->next = q.front;
-        q.front = new_node;
+        temp->next = q.front;
+        q.front = temp;
         return q;
     }
     // loop below has an issue...
@@ -486,8 +542,8 @@ queue enqueue (queue q, list_node* node)
     {
         if (node->score >= crawler1->score)
         {
-            new_node->next = crawler1;
-            crawler2->next = new_node;
+            temp->next = crawler1;
+            crawler2->next = temp;
             return q;
         }
         
@@ -495,8 +551,8 @@ queue enqueue (queue q, list_node* node)
         crawler1 = crawler1->next;
     }
     
-    crawler2->next = new_node;
-    q.rear = new_node;
+    crawler2->next = temp;
+    q.rear = temp;
     
     return q;
 }
@@ -536,3 +592,89 @@ void print_finalists (list_node* front)
     }
 }
 
+int only_child(trie_node* node)
+{
+    int count = 0;
+    int index = 0;
+    for(int i = 0; i < ALPH_SIZE; i++)
+    {
+        if (node->children[i] != NULL)
+        {
+            count++;
+            index = i;
+        }
+    } 
+    
+    if (count == 0)
+    {
+        return -1;
+    }
+    if (count > 1)
+    { 
+        return -2;
+    }
+    return index;
+}
+
+trie_node* radix_collapse(trie_node* node)
+{
+    // try to find the index of the node's only child
+    int child_index = only_child(node);
+    // if the node has no children, simply return the node
+    if (child_index == -1)
+    {
+        return node;
+    }
+    // if the node has more than one child, try to collapse all of them
+    if (child_index == -2)
+    {
+        for(int i = 0; i < ALPH_SIZE; i++)
+        {
+            trie_node* temp = node->children[i];
+            if (temp != NULL)
+            {
+                node->children[i] = radix_collapse(temp);
+            }
+        }
+        return node;
+    }
+    // get the pointer to the only child node
+    trie_node* child_node = node->children[child_index];
+    // don't collapse onto a node with a stored word (or things will get messy)
+    if (strlen(node->stored_word) != 0)
+    {
+        node->children[child_index] = radix_collapse(child_node);
+        return node;
+    }
+    // this is where we actually start collapsing
+    // update the node's substring to include the letter that points to the 
+    // only child
+    char child_letter = child_index + 'a';
+    if (node->substring == NULL)
+    {
+        node->substring = calloc(DICT_MAX_LENGTH,sizeof(char));
+        node->substring[0] = child_letter;
+    }
+    else
+    {
+        int length = strlen(node->substring);
+        node->substring[length] = child_letter;
+        node->substring[length + 1] = '\0';
+    }
+    // replace the node's children with its child's children
+    for (int i = 0; i < ALPH_SIZE; i++)
+    {
+        node->children[i] = child_node->children[i];
+    }
+    // if the child node stored a word, now store it at the parent
+    if (child_node->stored_word != NULL)
+    {
+        strcpy(node->stored_word, child_node->stored_word);
+    }
+    // free the child node we just eliminated
+    free(child_node->stored_word);
+    free(child_node);
+    // try to collapse this node further
+    radix_collapse(node);
+    return node;
+}
