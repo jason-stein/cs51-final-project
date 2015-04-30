@@ -26,7 +26,7 @@
 #define RESULTS 25
 
 /*
- * ADTs for Trie and Linked List Nodes
+ * ADTs for Trie, Linked List, and Queue
  */
 typedef struct trie_node 
 {
@@ -68,7 +68,7 @@ queue dequeue (queue q);
 bool check_alpha(char* word);
 
 // general functionality prototypes
-list_node* find_words(int* letters, trie_node* trie, list_node* head, bool last_letter);
+list_node* find_words(int* letters, trie_node* trie, list_node* head);
 int score_word(char* word, char* list1, char* list2);
 queue find_finalists (list_node* head, queue q, char* string1, char* string2);
 void print_finalists (list_node* front);
@@ -157,7 +157,7 @@ int main(int argc, char* argv[])
         letters[available[i] - 'a']++;
     }
     
-    head = find_words(letters, root, head, true);
+    head = find_words(letters, root, head);
     
     q = find_finalists(head, q, argv[1], argv[2]);
     
@@ -340,26 +340,29 @@ bool free_list(list_node* head)
     return true;
 }
 
-list_node* find_words(int* letters, trie_node* trie, list_node* head, bool last_letter)
+list_node* find_words(int* letters, trie_node* trie, list_node* head)
 {
+
+    // iterates through all of the user's possible letters and all of the 
+    // current trie node's pointers simultaneously 
     for (int i = 0; i < ALPH_SIZE; i++)
     {
+       // if the user has the requisite letters and there are trie pointers to 
+       // traverse associated with those letters, the trie is traversed with
+       // the letter used at that pointer removed (and then replaced)
         if (letters[i] > 0 && trie->children[i] != NULL)
         {
-            last_letter = false;
             letters[i]--;
-            head = find_words(letters, trie->children[i], head, true);
+            head = find_words(letters, trie->children[i], head);
             letters[i]++; 
-        }
-        else if (trie->children[i] != NULL)
-        {
-            last_letter = false;
-        }
-    }
-    
-    if (last_letter == true)
-        head = list_insert(trie->stored_word, head);
+        }  
         
+    } 
+    
+    // there is a word to store at this level of the trie, so store it
+    if (trie->stored_word != NULL)
+        head = list_insert(trie->stored_word, head);
+      
     return head;
 
 }
@@ -433,26 +436,11 @@ queue find_finalists (list_node* head, queue q, char* string1, char* string2)
     {
         crawler->score = score_word(crawler->stored_word, string1, string2);
         
-        /*if (crawler->score > max)
-        {
-            max = crawler->score;
-            max_node = crawler;
-        }*/
-        
         if (count < RESULTS)
         {
             q = enqueue(q, crawler);
             
             min_required = q.rear->score;
-            /*
-            if (count == 0)
-            {
-                min_required = crawler->score;
-            }
-            else if (crawler->score < min_required)
-            {
-                min_required = crawler->score;
-            }*/
             
             count++;
         } 
