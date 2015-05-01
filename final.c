@@ -518,8 +518,8 @@ queue dequeue (queue q)
             crawler->next = NULL;
             if (q.rear != NULL)
             {
-                free(q.rear);
                 free(q.rear->stored_word);
+                free(q.rear);
             }
             
             q.rear = crawler;
