@@ -17,27 +17,14 @@
 #include <ctype.h>
 #include <assert.h>
 
-
 // header file containing functions common to both implementations
 #include "common.h"
-
-/*
- * Global Constants
- */
-/*
-#define ALPH_SIZE 26
-#define DICT_MAX_LENGTH 45
-#define LIST_MAX_LENGTH 25
-#define DICTIONARY "words.txt"
-#define RESULTS 25
-*/
-
 
 // radix tree function prototypes
 int only_child(trie_node* node);
 trie_node* radix_collapse(trie_node* node);
 
-
+// user input will be stored here
 char available[LIST_MAX_LENGTH];
 
 int main(int argc, char* argv[])
@@ -118,8 +105,6 @@ int main(int argc, char* argv[])
     
     printf("Successfully unloaded dictionary.\n");
     return 0;
- 
-
 }
 
 int only_child(trie_node* node)

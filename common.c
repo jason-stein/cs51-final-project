@@ -10,6 +10,7 @@
 
 #include "common.h"
 
+// checks to make sure users input correctly
 bool verify_input (int num, char* first, char* second, char* third)
 {
     if (num != 4)
@@ -227,12 +228,16 @@ bool free_list(list_node* head)
     return true;
 }
 
+// finds all possible words the user can construct with his/her game board
 list_node* find_words(int* letters, trie_node* trie, list_node* head)
 {
     bool enough_letters = true;
     
+    // checks if there's a substring (only true of radix tree nodes)
     if(trie->substring != NULL)
     {
+        // takes out the letters of the substring at that node from possible
+        // letters that the user can use
         for (int j = 0; trie->substring[j] != '\0'; j++)
         {
             int index = trie->substring[j] - 'a';
@@ -255,6 +260,7 @@ list_node* find_words(int* letters, trie_node* trie, list_node* head)
         head = list_insert(trie->stored_word, head);
     }
     
+    // makes sure there are enough letters to further traverse the trie/tree
     if (enough_letters == true)
     {
         // iterates through all of the user's possible letters and all of the 
@@ -275,6 +281,7 @@ list_node* find_words(int* letters, trie_node* trie, list_node* head)
     
     }
     
+    // adds back in the letters for parental node usage
     if(trie->substring != NULL)
     {
         for (int j = 0; trie->substring[j] != '\0'; j++)
@@ -284,8 +291,6 @@ list_node* find_words(int* letters, trie_node* trie, list_node* head)
         }
     }
     
-    
-    // printf("%s\n",trie->stored_word);
     return head;
 
 }
@@ -342,23 +347,24 @@ bool check_alpha(char* word)
     return true;
 }
 
+// distills possibilities into a list of the RESULTS best words
 queue find_finalists (list_node* head, queue q, char* string1, char* string2)
 {
-    // int max = 0;
-    // list_node* max_node = head;
     list_node* crawler = head;
     
-    // continues to increment until hitting 25, at which point nodes' scores
+    // continues to increment until hitting RESULTS, at which point nodes' scores
     // are taken into account before inserting into list
     int count = 0;
     
-    // number defining the lowest value for something to get on the list
+    // number defining the lowest score value for something to get on the list
     int min_required = 0;
     
     while (crawler != NULL)
     {
+        // scores a node
         crawler->score = score_word(crawler->stored_word, string1, string2);
         
+        // fills up the initial queue with RESULTS nodes
         if (count < RESULTS)
         {
             q = enqueue(q, crawler);
@@ -367,6 +373,8 @@ queue find_finalists (list_node* head, queue q, char* string1, char* string2)
             
             count++;
         } 
+        // adds node to queue if its score exceeds the minimum score of queue
+        // removes the new lowest-score node
         else if (crawler->score > min_required)
         {
             //print_finalists(q.front);
@@ -375,44 +383,52 @@ queue find_finalists (list_node* head, queue q, char* string1, char* string2)
             min_required = q.rear->score;
         }
         
-        //printf("%s - %d\n", crawler->stored_word, crawler->score);
         crawler = crawler->next;
     }
 
-    
     print_finalists(q.front);
     return q;
 }
 
+// adds node to the finalist queue
 queue enqueue (queue q, list_node* node)
 {
+    // allocates space for new node of queue
     list_node* new_node = calloc(1, sizeof(list_node));
+    
+    // sets score of that node
     new_node->score = node->score;
     
+    // allocates space for its word
     new_node->stored_word = calloc(DICT_MAX_LENGTH, sizeof(char));
     
+    // copies word of possibilities list node into queue list node
     strcpy(new_node->stored_word,node->stored_word);
     
     list_node* crawler1 = q.front;
     list_node* crawler2 = q.front;
     
+    // inserts node into empty queue
     if (q.front == NULL)
     {
         q.front = new_node;
         q.rear = new_node;
-        //q.rear->next = q.front;
+
         return q;
     }
     
+    // special case when new node is the new maximum (or equal to it)
     if (node->score >= q.front->score)
     {
         new_node->next = q.front;
         q.front = new_node;
         return q;
     }
-    // loop below has an issue...
+    
+    // crawls through queue
     while (crawler1 != NULL)
     {
+        // puts node into its correct place (ordered by score)
         if (node->score >= crawler1->score)
         {
             new_node->next = crawler1;
@@ -424,18 +440,21 @@ queue enqueue (queue q, list_node* node)
         crawler1 = crawler1->next;
     }
     
+    // adds node if it's last (can happen during initial filling of queue)
     crawler2->next = new_node;
     q.rear = new_node;
     
     return q;
 }
 
+// removes node from queue (QDQQQ!)
 queue dequeue (queue q)
 {
     list_node* crawler = q.front;
     
     while (crawler != NULL)
     {
+        // pops off rear of queue
         if (crawler->next == q.rear)
         {
             crawler->next = NULL;
@@ -456,6 +475,7 @@ queue dequeue (queue q)
     return q;
 }
 
+// prints finalist queue
 void print_finalists (list_node* front)
 {
     list_node* crawler = front;
