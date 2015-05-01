@@ -79,10 +79,12 @@ int main(int argc, char* argv[])
     printf("Successfully loaded dictionary.\n");
     
     // some tests
+    /*
     assert(search("mason", root));
     assert(search("butts", root));
     assert(search("agammaglobulinemias", root));
     assert(!search("asdfgh", root));
+    */
     
     int letters[ALPH_SIZE] = {0};
     
@@ -93,6 +95,7 @@ int main(int argc, char* argv[])
     
     root = radix_collapse(root);
     
+    /* 
     assert(search("mason", root));
     assert(search("butts", root));
     assert(search("agammaglobulinemias", root));
@@ -100,12 +103,13 @@ int main(int argc, char* argv[])
     assert(!search("backlightedd", root));
     assert(search("backlighted",root));
     assert(search("uncopyrightable",root));
+    */
    
     head = find_words(letters, root, head);
     
     q = find_finalists(head, q, argv[1], argv[2]);
     
-    if (!free_list(head) /*|| !free_list(q.front)*/)
+    if (!free_list(head) || !free_list(q.front))
     {
         return 1;
     }
