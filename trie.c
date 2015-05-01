@@ -19,67 +19,6 @@
 
 #include "common.h"
 
-/*
- * Global Constants
- */
-/*
-#define ALPH_SIZE 26
-#define DICT_MAX_LENGTH 45
-#define LIST_MAX_LENGTH 25
-#define DICTIONARY "words.txt"
-#define RESULTS 25
-*/
-/*
- * ADTs for Trie, Linked List, and Queue
- */
- /*
-typedef struct trie_node 
-{
-    char* stored_word;
-    struct trie_node* children [ALPH_SIZE];
-}
-trie_node;
-
-typedef struct list_node
-{
-    char* stored_word;
-    int score;
-    struct list_node* next;
-}
-list_node;
-
-typedef struct queue
-{
-    list_node* front;
-    list_node* rear;
-}queue;
-*/
-// trie function prototypes 
-/* void trie_insert(char* word, trie_node* root);
-bool load(const char* dictionary, trie_node* root);
-void unload(trie_node* n); 
-bool search(char* query, trie_node* root);
-*/
-
-/*
-// list function prototypes 
-list_node* list_insert(char* word, list_node* head);
-bool free_list(list_node* head);
-
-// queue function prototypes
-queue enqueue (queue q, list_node* node);
-queue dequeue (queue q);
-
-// user input function prototype
-bool check_alpha(char* word);
-
-// general functionality prototypes
-list_node* find_words(int* letters, trie_node* trie, list_node* head);
-int score_word(char* word, char* list1, char* list2);
-queue find_finalists (list_node* head, queue q, char* string1, char* string2);
-void print_finalists (list_node* front);
-*/
-
 char available[LIST_MAX_LENGTH];
 
 int main(int argc, char* argv[])
@@ -122,12 +61,6 @@ int main(int argc, char* argv[])
     
     printf("Successfully loaded dictionary.\n");
     
-    // some tests
-    assert(search("mason", root));
-    assert(search("butts", root));
-    assert(search("agammaglobulinemias", root));
-    assert(!search("asdfgh", root));
-    
     int letters[ALPH_SIZE] = {0};
     
     for (int i = 0; i < strlen(available); i++)
@@ -135,6 +68,7 @@ int main(int argc, char* argv[])
         letters[available[i] - 'a']++;
     }
     
+    // some tests
     assert(search("mason", root));
     assert(search("butts", root));
     assert(search("agammaglobulinemias", root));
@@ -147,7 +81,7 @@ int main(int argc, char* argv[])
     
     q = find_finalists(head, q, argv[1], argv[2]);
     
-    if (!free_list(head) /*|| !free_list(q.front)*/)
+    if (!free_list(head) || !free_list(q.front))
     {
         return 1;
     }

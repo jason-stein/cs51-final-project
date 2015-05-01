@@ -97,6 +97,8 @@ bool load(const char* dictionary, trie_node* root)
         trie_insert(word, root);
     }
     
+    fclose(dict);
+    
     return true;
 }
 
@@ -384,26 +386,28 @@ queue find_finalists (list_node* head, queue q, char* string1, char* string2)
 
 queue enqueue (queue q, list_node* node)
 {
-    list_node* temp = calloc(1, sizeof(list_node));
-    temp->score = node->score;
-    temp->stored_word = node->stored_word;
+    list_node* new_node = calloc(1, sizeof(list_node));
+    new_node->score = node->score;
+    
+    new_node->stored_word = calloc(DICT_MAX_LENGTH, sizeof(char));
+    
+    strcpy(new_node->stored_word,node->stored_word);
     
     list_node* crawler1 = q.front;
     list_node* crawler2 = q.front;
-    // crawler2->next = crawler1;
     
     if (q.front == NULL)
     {
-        q.front = temp;
-        q.rear = temp;
+        q.front = new_node;
+        q.rear = new_node;
         //q.rear->next = q.front;
         return q;
     }
     
     if (node->score >= q.front->score)
     {
-        temp->next = q.front;
-        q.front = temp;
+        new_node->next = q.front;
+        q.front = new_node;
         return q;
     }
     // loop below has an issue...
@@ -411,8 +415,8 @@ queue enqueue (queue q, list_node* node)
     {
         if (node->score >= crawler1->score)
         {
-            temp->next = crawler1;
-            crawler2->next = temp;
+            new_node->next = crawler1;
+            crawler2->next = new_node;
             return q;
         }
         
@@ -420,8 +424,8 @@ queue enqueue (queue q, list_node* node)
         crawler1 = crawler1->next;
     }
     
-    crawler2->next = temp;
-    q.rear = temp;
+    crawler2->next = new_node;
+    q.rear = new_node;
     
     return q;
 }
@@ -435,10 +439,14 @@ queue dequeue (queue q)
         if (crawler->next == q.rear)
         {
             crawler->next = NULL;
-            
-            free(q.rear);
+            if (q.rear != NULL)
+            {
+                free(q.rear->stored_word);
+                free(q.rear);
+            }
             
             q.rear = crawler;
+            
             return q;
         }
         
