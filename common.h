@@ -35,6 +35,10 @@ typedef struct queue
     list_node* rear;
 }queue;
 
+// structs for timing data
+struct rusage before, after, before_all, after_all;
+
+
 // trie function prototypes 
 void trie_insert(char* word, trie_node* root);
 bool load(const char* dictionary, trie_node* root);
@@ -58,6 +62,9 @@ list_node* find_words(int* letters, trie_node* trie, list_node* head);
 int score_word(char* word, char* list1, char* list2);
 queue find_finalists (list_node* head, queue q, char* string1, char* string2);
 void print_finalists (list_node* front);
+
+// time calculation
+double calculate(const struct rusage* b, const struct rusage* a);
 
 
 #endif
