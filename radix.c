@@ -9,6 +9,7 @@
 /*
  * Function Libraries
  */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -16,20 +17,25 @@
 #include <ctype.h>
 #include <assert.h>
 
+
 // header file containing functions common to both implementations
 #include "common.h"
 
 /*
  * Global Constants
  */
+/*
 #define ALPH_SIZE 26
 #define DICT_MAX_LENGTH 45
 #define LIST_MAX_LENGTH 25
 #define DICTIONARY "words.txt"
 #define RESULTS 25
+*/
 
 
-
+// radix tree function prototypes
+int only_child(trie_node* node);
+trie_node* radix_collapse(trie_node* node);
 
 
 char available[LIST_MAX_LENGTH];
@@ -150,6 +156,94 @@ int main(int argc, char* argv[])
     return 0;
  
 
+}
+
+int only_child(trie_node* node)
+{
+    int count = 0;
+    int index = 0;
+    
+    for(int i = 0; i < ALPH_SIZE; i++)
+    {
+        if (node->children[i] != NULL)
+        {
+            count++;
+            index = i;
+        }
+    } 
+    
+    if (count == 0)
+    {
+        return -1;
+    }
+    if (count > 1)
+    { 
+        return -2;
+    }
+    return index;
+}
+
+trie_node* radix_collapse(trie_node* node)
+{
+    // try to find the index of the node's only child
+    int child_index = only_child(node);
+    // if the node has no children, simply return the node
+    if (child_index == -1)
+    {
+        return node;
+    }
+    // if the node has more than one child, try to collapse all of them
+    if (child_index == -2)
+    {
+        for(int i = 0; i < ALPH_SIZE; i++)
+        {
+            trie_node* temp = node->children[i];
+            if (temp != NULL)
+            {
+                node->children[i] = radix_collapse(temp);
+            }
+        }
+        return node;
+    }
+    // get the pointer to the only child node
+    trie_node* child_node = node->children[child_index];
+    // don't collapse onto a node with a stored word (or things will get messy)
+    if (strlen(node->stored_word) != 0)
+    {
+        node->children[child_index] = radix_collapse(child_node);
+        return node;
+    }
+    // this is where we actually start collapsing
+    // update the node's substring to include the letter that points to the 
+    // only child
+    char child_letter = child_index + 'a';
+    if (node->substring == NULL)
+    {
+        node->substring = calloc(DICT_MAX_LENGTH,sizeof(char));
+        node->substring[0] = child_letter;
+    }
+    else
+    {
+        int length = strlen(node->substring);
+        node->substring[length] = child_letter;
+        node->substring[length + 1] = '\0';
+    }
+    // replace the node's children with its child's children
+    for (int i = 0; i < ALPH_SIZE; i++)
+    {
+        node->children[i] = child_node->children[i];
+    }
+    // if the child node stored a word, now store it at the parent
+    if (child_node->stored_word != NULL)
+    {
+        strcpy(node->stored_word, child_node->stored_word);
+    }
+    // free the child node we just eliminated
+    free(child_node->stored_word);
+    free(child_node);
+    // try to collapse this node further
+    radix_collapse(node);
+    return node;
 }
 
 
