@@ -250,7 +250,6 @@ list_node* find_words(int* letters, trie_node* trie, list_node* head)
     if (enough_letters && trie->stored_word != NULL 
         && strlen(trie->stored_word) != 0)
     {
-        printf("%s\n",trie->stored_word);
         head = list_insert(trie->stored_word, head);
     }
     
