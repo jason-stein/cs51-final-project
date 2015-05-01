@@ -162,7 +162,7 @@ int main(int argc, char* argv[])
     
     q = find_finalists(head, q, argv[1], argv[2]);
     
-    if (!free_list(head) /*|| !free_list(q.front)*/)
+    if (!free_list(head) || !free_list(q.front))
     {
         return 1;
     }
@@ -230,6 +230,8 @@ bool load(const char* dictionary, trie_node* root)
     {
         trie_insert(word, root);
     }
+    
+    fclose(dict);
     
     return true;
 }
@@ -453,7 +455,7 @@ queue find_finalists (list_node* head, queue q, char* string1, char* string2)
     }
 
     
-    //print_finalists(q.front);
+    print_finalists(q.front);
     return q;
 }
 
@@ -461,7 +463,11 @@ queue enqueue (queue q, list_node* node)
 {
     list_node* new_node = calloc(1, sizeof(list_node));
     new_node->score = node->score;
-    new_node->stored_word = node->stored_word;
+    // new_node->stored_word = node->stored_word;
+    
+    new_node->stored_word = calloc(DICT_MAX_LENGTH, sizeof(char));
+    
+    strcpy(new_node->stored_word,node->stored_word);
     
     list_node* crawler1 = q.front;
     list_node* crawler2 = q.front;
@@ -510,10 +516,14 @@ queue dequeue (queue q)
         if (crawler->next == q.rear)
         {
             crawler->next = NULL;
-            
-            free(q.rear);
+            if (q.rear != NULL)
+            {
+                free(q.rear);
+                free(q.rear->stored_word);
+            }
             
             q.rear = crawler;
+            
             return q;
         }
         
