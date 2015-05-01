@@ -6,10 +6,15 @@
 #
 
 
-# Rule to make 'final' executable
-final: final.o
-	gcc -o final final.o
+# Rule to make executables
+all: trie radix
 
-# Rule to clean all files created my compiler
+trie: trie.o common.o
+	gcc -o trie trie.o common.o
+	
+radix: radix.o common.o
+	gcc -o radix radix.o common.o
+
+# Rule to clean all files created by compiler
 clean:
-	rm -f final radix trie temp temp2 core *.o
+	rm -f trie radix core *.o

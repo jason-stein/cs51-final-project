@@ -133,7 +133,7 @@ bool search(char* query, trie_node* root)
         // isn't there
         if (crawl->children[index] == NULL)
         {
-            return false;
+            return (strcmp(query, crawl->stored_word) == 0);
         }
         // otherwise crawl to the next node
         else crawl = crawl->children[index];

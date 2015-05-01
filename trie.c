@@ -135,17 +135,22 @@ int main(int argc, char* argv[])
         letters[available[i] - 'a']++;
     }
     
+    assert(search("mason", root));
+    assert(search("butts", root));
+    assert(search("agammaglobulinemias", root));
+    assert(!search("asdfgh", root));
+    assert(!search("backlightedd", root));
+    assert(search("backlighted",root));
+    assert(search("uncopyrightable",root));
+   
     head = find_words(letters, root, head);
     
     q = find_finalists(head, q, argv[1], argv[2]);
     
-    if (!free_list(head) || !free_list(q.front))
+    if (!free_list(head) /*|| !free_list(q.front)*/)
     {
         return 1;
     }
-    
-    printf("Successfully freed lists.\n");
-    
     head = NULL;
    
     unload(root);
@@ -227,7 +232,7 @@ bool search(char* query, trie_node* root)
         // isn't there
         if (crawl->children[index] == NULL)
         {
-            return false;
+            return (strcmp(query, crawl->stored_word) == 0);
         }
         // otherwise crawl to the next node
         else crawl = crawl->children[index];
@@ -317,9 +322,57 @@ bool search(char* query, trie_node* root)
 
 /*list_node* find_words(int* letters, trie_node* trie, list_node* head)
 {
+<<<<<<< HEAD:temp2.c
+    if(trie->substring != NULL)
+    {
+        for (int j = 0; trie->substring[j] != '\0'; j++)
+        {
+            int index = trie->substring[j] - 'a';
+            letters[index]--;
+        }
+    }
+<<<<<<< HEAD
+=======
+    
+>>>>>>> 48c35996381dc8e3630be7912936a036d0daafc6
+    // make sure we had enough letters to spell out the substring
+    bool enough_letters = true;
+    for (int i = 0; i < ALPH_SIZE; i++)
+    {
+        if (letters[i] < 0)
+            enough_letters = false;
+    }
+    
+<<<<<<< HEAD
+    // iterates through all of the user's possible letters and all of the 
+    // current trie node's pointers simultaneously 
+    for (int i = 0; i < ALPH_SIZE && enough_letters == true; i++)
+    {
+       // if the user has the requisite letters and there are trie pointers to 
+       // traverse associated with those letters, the trie is traversed with
+       // the letter used at that pointer removed (and then replaced)
+        if (letters[i] > 0 && trie->children[i] != NULL)
+        {
+            letters[i]--;
+            head = find_words(letters, trie->children[i], head);
+            letters[i]++;
+            
+        }
+    }
+    // there is a word to store at this level of the trie, so store it
+    if (trie->stored_word != NULL 
+=======
+    // there is a word to store at this level of the trie, so store it
+    if (enough_letters && trie->stored_word != NULL 
+>>>>>>> 48c35996381dc8e3630be7912936a036d0daafc6
+        && strlen(trie->stored_word) != 0)
+    {
+        printf("%s\n",trie->stored_word);
+=======
 
     // there is a word to store at this level of the trie, so store it
     if (trie->stored_word != NULL && strlen(trie->stored_word) != 0)
+>>>>>>> bfbb654ab9031a45564ff61555c4a570c50e4c9a:trie.c
         head = list_insert(trie->stored_word, head);
 
     // iterates through all of the user's possible letters and all of the 
