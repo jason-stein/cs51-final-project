@@ -12,4 +12,4 @@ final: final.o
 
 # Rule to clean all files created my compiler
 clean:
-	rm -f final core *.o
+	rm -f final radix trie temp temp2 core *.o

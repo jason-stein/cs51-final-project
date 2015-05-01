@@ -49,7 +49,8 @@ bool free_list(list_node* head);
 queue enqueue (queue q, list_node* node);
 queue dequeue (queue q);
 
-// user input function prototype
+// user input function prototypes
+bool verify_input (int num, char* first, char* second, char* third);
 bool check_alpha(char* word);
 
 // general functionality prototypes

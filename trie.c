@@ -85,8 +85,6 @@ char available[LIST_MAX_LENGTH];
 int main(int argc, char* argv[])
 {
     
-    printf("%d",sizeof(queue));
-    
     // trie root 
     trie_node* root = calloc(1,sizeof(trie_node));
     root->stored_word = NULL;
@@ -97,39 +95,9 @@ int main(int argc, char* argv[])
     // queue for finalists (top 25) linked list nodes
     queue q = {NULL, NULL};
     
-    // check usage
-    if (argc != 4)
-    {
-    
-        /* The user will be entering three strings, described as follows:
-         * 1) White space letters (unclaimed by either player)
-         * 2) Light red space letters (claimed by opponent but up-for-grabs)
-         * 3) Dark red space and blue space letters (not up-for-grabs--won't improve score if used)
-         */
-        
-        printf("Usage: ./final OpponentPotentialString "\
-        "UnclaimedString OpponentBlockedAndPlayer'sString \n");
-        return 1;
-    }
-    
-    // make sure the user enters the right number of letters
-    if (strlen(argv[1]) + strlen(argv[2]) + strlen(argv[3]) 
-        != LIST_MAX_LENGTH)
-    {
-        printf("Please enter a total of 25 letters.\n");
-        return 1;
-    }
-    
-    // and check that they're all letters
-    else 
-        if (!check_alpha(argv[1]) || !check_alpha(argv[1]) 
-            || !check_alpha(argv[1]))
-        {
-            printf("Please only enter letters!\n");
-            return 1;
-        }
+   
     // if input is valid, parse arguments
-    else
+    if (verify_input(argc, argv[1],argv[2],argv[3]))
     {
         // concatenate the command line arguments into one string
         strcat(available, argv[1]);
@@ -142,6 +110,8 @@ int main(int argc, char* argv[])
         }
         printf("Available letters: %s\n", available); 
     }
+    else
+        return 1;
     
     // attempt to load the dictionary
     if (!load(DICTIONARY, root))

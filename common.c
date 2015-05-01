@@ -10,6 +10,41 @@
 
 #include "common.h"
 
+bool verify_input (int num, char* first, char* second, char* third)
+{
+    if (num != 4)
+    {
+    
+        /* The user will be entering three strings, described as follows:
+         * 1) White space letters (unclaimed by either player)
+         * 2) Light red space letters (claimed by opponent but up-for-grabs)
+         * 3) Dark red space and blue space letters (not up-for-grabs--won't improve score if used)
+         */
+        
+        printf("Usage: ./final OpponentPotentialString "\
+        "UnclaimedString OpponentBlockedAndPlayer'sString \n");
+        return false;
+    }
+    
+    // make sure the user enters the right number of letters
+    if (strlen(first) + strlen(second) + strlen(third) 
+        != LIST_MAX_LENGTH)
+    {
+        printf("Please enter a total of 25 letters.\n");
+        return false;
+    }
+    
+    // and check that they're all letters
+    if (!check_alpha(first) || !check_alpha(second) 
+            || !check_alpha(third))
+    {
+        printf("Please only enter letters!\n");
+        return false;
+    }
+        
+    return true;
+}
+
 // inserts a single word into the trie
 void trie_insert(char* word, trie_node* root)
 {
