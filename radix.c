@@ -72,8 +72,8 @@ int main(int argc, char* argv[])
         return 1;
     }
     
-    // some tests
-    /*
+    // some tests we used in developing the project
+    /* 
     assert(search("mason", root));
     assert(search("butts", root));
     assert(search("agammaglobulinemias", root));
@@ -93,7 +93,8 @@ int main(int argc, char* argv[])
         letters[available[i] - 'a']++;
     }
     
-    /* 
+    // more of those
+    /*
     assert(search("mason", root));
     assert(search("butts", root));
     assert(search("agammaglobulinemias", root));

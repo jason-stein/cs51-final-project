@@ -78,7 +78,8 @@ int main(int argc, char* argv[])
         letters[available[i] - 'a']++;
     }
     
-    // some tests
+    // some tests we used in developing the project
+    /*
     assert(search("mason", root));
     assert(search("butts", root));
     assert(search("agammaglobulinemias", root));
@@ -86,6 +87,7 @@ int main(int argc, char* argv[])
     assert(!search("backlightedd", root));
     assert(search("backlighted",root));
     assert(search("uncopyrightable",root));
+    */
     
     getrusage(RUSAGE_SELF, &before);
    
@@ -116,31 +118,6 @@ int main(int argc, char* argv[])
     printf("Total program time: %f\n",time_total);
     return 0;
 }
-
-// checks if a given query is stored in the dictionary
-/*
-bool search(char* query, trie_node* root)
-{
-    // initialize a crawler
-    trie_node* crawl = root;
-    for (int i = 0; query[i] != '\0'; i++)
-    {
-        // gets the 0-25 index of the letter
-        int index = query[i] - 'a';
-        // if there is no pointer at this node for the letter, then the word 
-        // isn't there
-        if (crawl->children[index] == NULL)
-        {
-            return (strcmp(query, crawl->stored_word) == 0);
-        }
-        // otherwise crawl to the next node
-        else crawl = crawl->children[index];
-    }
-    
-    // we are now at the last node, where this word should be stored,
-    // so check that the stored word is indeed the query
-    return (strcmp(query, crawl->stored_word) == 0);
-}*/
 
 
 
