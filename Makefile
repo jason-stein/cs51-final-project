@@ -18,4 +18,4 @@ temp2: temp2.o
 
 # Rule to clean all files created my compiler
 clean:
-	rm -f final core *.o
+	rm -f final temp temp2 core *.o

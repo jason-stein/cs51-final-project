@@ -378,7 +378,90 @@ bool free_list(list_node* head)
     return true;
 }
 
+list_node* find_words(int* letters, trie_node* trie, list_node* head)
+{
+    if(trie->substring != NULL)
+    {
+        for (int j = 0; trie->substring[j] != '\0'; j++)
+        {
+            int index = trie->substring[j] - 'a';
+            letters[index]--;
+        }
+    }
+<<<<<<< HEAD
+=======
+    
+>>>>>>> 48c35996381dc8e3630be7912936a036d0daafc6
+    // make sure we had enough letters to spell out the substring
+    bool enough_letters = true;
+    for (int i = 0; i < ALPH_SIZE; i++)
+    {
+        if (letters[i] < 0)
+            enough_letters = false;
+    }
+    
+<<<<<<< HEAD
+    // iterates through all of the user's possible letters and all of the 
+    // current trie node's pointers simultaneously 
+    for (int i = 0; i < ALPH_SIZE && enough_letters == true; i++)
+    {
+       // if the user has the requisite letters and there are trie pointers to 
+       // traverse associated with those letters, the trie is traversed with
+       // the letter used at that pointer removed (and then replaced)
+        if (letters[i] > 0 && trie->children[i] != NULL)
+        {
+            letters[i]--;
+            head = find_words(letters, trie->children[i], head);
+            letters[i]++;
+            
+        }
+    }
+    // there is a word to store at this level of the trie, so store it
+    if (trie->stored_word != NULL 
+=======
+    // there is a word to store at this level of the trie, so store it
+    if (enough_letters && trie->stored_word != NULL 
+>>>>>>> 48c35996381dc8e3630be7912936a036d0daafc6
+        && strlen(trie->stored_word) != 0)
+    {
+        printf("%s\n",trie->stored_word);
+        head = list_insert(trie->stored_word, head);
+    }
+    
+    if (enough_letters == true)
+    {
+        // iterates through all of the user's possible letters and all of the 
+        // current trie node's pointers simultaneously 
+        for (int i = 0; i < ALPH_SIZE; i++)
+        {
+            // if the user has the requisite letters and there are trie pointers to 
+            // traverse associated with those letters, the trie is traversed with
+            // the letter used at that pointer removed (and then replaced)
+            if (letters[i] > 0 && trie->children[i] != NULL)
+            {
+                letters[i]--;
+                head = find_words(letters, trie->children[i], head);
+                letters[i]++; 
+            
+            }
+        }
+    
+    }
+    
+    if(trie->substring != NULL)
+    {
+        for (int j = 0; trie->substring[j] != '\0'; j++)
+        {
+            int index = trie->substring[j] - 'a';
+            letters[index]++;
+        }
+    }
+    
+    
+    // printf("%s\n",trie->stored_word);
+    return head;
 
+}
 
 // Finds the score for a word:
 
