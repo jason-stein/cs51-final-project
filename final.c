@@ -531,4 +531,3 @@ void print_finalists (list_node* front)
         number++;
     }
 }
-
