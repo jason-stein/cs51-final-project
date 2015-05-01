@@ -5,8 +5,8 @@ To compile, run 'make'.
 
 'make clean' will remove all products of compiling process.
 
-To run, execute ./final followed by 3 strings (no quotes, no separation within 
-    strings, strings separated by spaces).
+To run, execute ./trie or ./radix followed by 3 strings 
+    (no quotes, no separation within strings, strings separated by spaces).
 
 The three strings are as follows
 - Letters held by opponent but available to 'steal.'

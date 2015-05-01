@@ -1,11 +1,3 @@
-/* 
- * 
- * Letterpress "Best Words" Solver
- * By Jason Stein and Mason Hale
- *
- */
-
-
 /*
  * Function Libraries
  */
@@ -16,190 +8,7 @@
 #include <ctype.h>
 #include <assert.h>
 
-/*
- * Global Constants
- */
-#define ALPH_SIZE 26
-#define DICT_MAX_LENGTH 45
-#define LIST_MAX_LENGTH 25
-#define DICTIONARY "words.txt"
-#define RESULTS 25
-
-/*
- * ADTs for Trie, Linked List, and Queue
- */
-typedef struct trie_node 
-{
-    char* substring;
-    char* stored_word;
-    struct trie_node* children [ALPH_SIZE];
-}
-trie_node;
-
-typedef struct list_node
-{
-    char* stored_word;
-    int score;
-    struct list_node* next;
-}
-list_node;
-
-typedef struct queue
-{
-    list_node* front;
-    list_node* rear;
-}queue;
-
-// trie function prototypes 
-void trie_insert(char* word, trie_node* root);
-bool load(const char* dictionary, trie_node* root);
-void unload(trie_node* n);
-bool search(char* query, trie_node* root);
-
-// radix tree function prototypes
-int only_child(trie_node* node);
-trie_node* radix_collapse(trie_node* node);
-
-// list function prototypes 
-list_node* list_insert(char* word, list_node* head);
-bool free_list(list_node* head);
-
-// queue function prototypes
-queue enqueue (queue q, list_node* node);
-queue dequeue (queue q);
-
-// user input function prototype
-bool check_alpha(char* word);
-
-// general functionality prototypes
-list_node* find_words(int* letters, trie_node* trie, list_node* head);
-int score_word(char* word, char* list1, char* list2);
-queue find_finalists (list_node* head, queue q, char* string1, char* string2);
-void print_finalists (list_node* front);
-
-
-char available[LIST_MAX_LENGTH];
-
-int main(int argc, char* argv[])
-{
-    
-    // trie root 
-    trie_node* root = calloc(1,sizeof(trie_node));
-    root->stored_word = NULL;
-    
-    // all possible words linked list head
-    list_node* head = NULL;
-
-    // queue for finalists (top 25) linked list nodes
-    queue q = {NULL, NULL};
-    
-    // check usage
-    if (argc != 4)
-    {
-    
-        /* The user will be entering three strings, described as follows:
-         * 1) White space letters (unclaimed by either player)
-         * 2) Light red space letters (claimed by opponent but up-for-grabs)
-         * 3) Dark red space and blue space letters (not up-for-grabs--won't improve score if used)
-         */
-        
-        printf("Usage: ./final OpponentPotentialString "\
-        "UnclaimedString OpponentBlockedAndPlayer'sString \n");
-        return 1;
-    }
-    
-    // make sure the user enters the right number of letters
-    if (strlen(argv[1]) + strlen(argv[2]) + strlen(argv[3]) 
-        != LIST_MAX_LENGTH)
-    {
-        printf("Please enter a total of 25 letters.\n");
-        return 1;
-    }
-    
-    // and check that they're all letters
-    else 
-        if (!check_alpha(argv[1]) || !check_alpha(argv[1]) 
-            || !check_alpha(argv[1]))
-        {
-            printf("Please only enter letters!\n");
-            return 1;
-        }
-    // if input is valid, parse arguments
-    else
-    {
-        // concatenate the command line arguments into one string
-        strcat(available, argv[1]);
-        strcat(available, argv[2]);
-        strcat(available, argv[3]);
-        // make all letters lowercase for convenience
-        for(int i = 0, length = strlen(available); i < length; i++)
-        {
-            available[i] = tolower(available[i]);
-        }
-        printf("Available letters: %s\n", available); 
-    }
-    
-    // attempt to load the dictionary
-    if (!load(DICTIONARY, root))
-    {
-        printf("error: failed to load dictionary\n");
-        return 1;
-    }
-    
-    printf("Successfully loaded dictionary.\n");
-    
-    // some tests
-    assert(search("mason", root));
-    assert(search("butts", root));
-    assert(search("agammaglobulinemias", root));
-    assert(!search("asdfgh", root));
-    
-    int letters[ALPH_SIZE] = {0};
-    
-    for (int i = 0; i < strlen(available); i++)
-    {
-        letters[available[i] - 'a']++;
-    }
-    
-/*    head = find_words(letters, root, head);
-    
-    q = find_finalists(head, q, argv[1], argv[2]);
-    
-    if (!free_list(head) || !free_list(q.front))
-    {
-        return 1;
-    }
- */   
-    // printf("Successfully freed lists.\n");
-    
-    // head = NULL;
-    
-    root = radix_collapse(root);
-    
-    assert(search("mason", root));
-    assert(search("butts", root));
-    assert(search("agammaglobulinemias", root));
-    assert(!search("asdfgh", root));
-    assert(!search("backlightedd", root));
-    assert(search("backlighted",root));
-    assert(search("uncopyrightable",root));
-   
-    head = find_words(letters, root, head);
-    
-    q = find_finalists(head, q, argv[1], argv[2]);
-    
-    if (!free_list(head) /*|| !free_list(q.front)*/)
-    {
-        return 1;
-    }
-   
-    unload(root);
-    
-    printf("Successfully unloaded dictionary.\n");
-    return 0;
- 
-
-}
+#include "common.h"
 
 // inserts a single word into the trie
 void trie_insert(char* word, trie_node* root)
@@ -320,7 +129,10 @@ void unload(trie_node* n)
     }
     
     // free all parts of the node
-    free(n->substring);
+    if (n->substring != NULL)
+    {
+        free(n->substring);
+    }
     free(n->stored_word);
     free(n);
     
@@ -380,6 +192,8 @@ bool free_list(list_node* head)
 
 list_node* find_words(int* letters, trie_node* trie, list_node* head)
 {
+    bool enough_letters = true;
+    
     if(trie->substring != NULL)
     {
         for (int j = 0; trie->substring[j] != '\0'; j++)
@@ -387,41 +201,18 @@ list_node* find_words(int* letters, trie_node* trie, list_node* head)
             int index = trie->substring[j] - 'a';
             letters[index]--;
         }
-    }
-<<<<<<< HEAD
-=======
-    
->>>>>>> 48c35996381dc8e3630be7912936a036d0daafc6
-    // make sure we had enough letters to spell out the substring
-    bool enough_letters = true;
-    for (int i = 0; i < ALPH_SIZE; i++)
-    {
-        if (letters[i] < 0)
-            enough_letters = false;
-    }
-    
-<<<<<<< HEAD
-    // iterates through all of the user's possible letters and all of the 
-    // current trie node's pointers simultaneously 
-    for (int i = 0; i < ALPH_SIZE && enough_letters == true; i++)
-    {
-       // if the user has the requisite letters and there are trie pointers to 
-       // traverse associated with those letters, the trie is traversed with
-       // the letter used at that pointer removed (and then replaced)
-        if (letters[i] > 0 && trie->children[i] != NULL)
+        
+        // make sure we had enough letters to spell out the substring
+        
+        for (int i = 0; i < ALPH_SIZE; i++)
         {
-            letters[i]--;
-            head = find_words(letters, trie->children[i], head);
-            letters[i]++;
-            
+            if (letters[i] < 0)
+                enough_letters = false;
         }
     }
-    // there is a word to store at this level of the trie, so store it
-    if (trie->stored_word != NULL 
-=======
+    
     // there is a word to store at this level of the trie, so store it
     if (enough_letters && trie->stored_word != NULL 
->>>>>>> 48c35996381dc8e3630be7912936a036d0daafc6
         && strlen(trie->stored_word) != 0)
     {
         printf("%s\n",trie->stored_word);
@@ -636,90 +427,4 @@ void print_finalists (list_node* front)
     }
 }
 
-int only_child(trie_node* node)
-{
-    int count = 0;
-    int index = 0;
-    
-    for(int i = 0; i < ALPH_SIZE; i++)
-    {
-        if (node->children[i] != NULL)
-        {
-            count++;
-            index = i;
-        }
-    } 
-    
-    if (count == 0)
-    {
-        return -1;
-    }
-    if (count > 1)
-    { 
-        return -2;
-    }
-    return index;
-}
 
-trie_node* radix_collapse(trie_node* node)
-{
-    // try to find the index of the node's only child
-    int child_index = only_child(node);
-    // if the node has no children, simply return the node
-    if (child_index == -1)
-    {
-        return node;
-    }
-    // if the node has more than one child, try to collapse all of them
-    if (child_index == -2)
-    {
-        for(int i = 0; i < ALPH_SIZE; i++)
-        {
-            trie_node* temp = node->children[i];
-            if (temp != NULL)
-            {
-                node->children[i] = radix_collapse(temp);
-            }
-        }
-        return node;
-    }
-    // get the pointer to the only child node
-    trie_node* child_node = node->children[child_index];
-    // don't collapse onto a node with a stored word (or things will get messy)
-    if (strlen(node->stored_word) != 0)
-    {
-        node->children[child_index] = radix_collapse(child_node);
-        return node;
-    }
-    // this is where we actually start collapsing
-    // update the node's substring to include the letter that points to the 
-    // only child
-    char child_letter = child_index + 'a';
-    if (node->substring == NULL)
-    {
-        node->substring = calloc(DICT_MAX_LENGTH,sizeof(char));
-        node->substring[0] = child_letter;
-    }
-    else
-    {
-        int length = strlen(node->substring);
-        node->substring[length] = child_letter;
-        node->substring[length + 1] = '\0';
-    }
-    // replace the node's children with its child's children
-    for (int i = 0; i < ALPH_SIZE; i++)
-    {
-        node->children[i] = child_node->children[i];
-    }
-    // if the child node stored a word, now store it at the parent
-    if (child_node->stored_word != NULL)
-    {
-        strcpy(node->stored_word, child_node->stored_word);
-    }
-    // free the child node we just eliminated
-    free(child_node->stored_word);
-    free(child_node);
-    // try to collapse this node further
-    radix_collapse(node);
-    return node;
-}

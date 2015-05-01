@@ -7,15 +7,14 @@
 
 
 # Rule to make executables
-final: final.o
-	gcc -o final final.o
+all: trie radix
+
+trie: trie.o common.o
+	gcc -o trie trie.o common.o
 	
-temp: temp.o
-	gcc -o temp temp.o
-	
-temp2: temp2.o
-	gcc -o temp2 final.o
+radix: radix.o common.o
+	gcc -o radix radix.o common.o
 
 # Rule to clean all files created my compiler
 clean:
-	rm -f final temp temp2 core *.o
+	rm -f trie radix core *.o
